@@ -1,0 +1,50 @@
+KNOWN BUGS
+
+No known bugs
+
+DESIGN DETAILS SPECIFIC TO YOUR CODE
+
+I used AngularJS for dynamically responding to and validating user input, and for JSON requests.
+I used AJAX to get data from the server, and used a REST-style system to send queries to the server.
+
+
+ANY RUNTIME/SPACE OPTIMIZATIONS YOU MADE BEYOND THE MINIMUM REQUIREMENTS
+
+Used AJAX to communicate between the client and server.
+Used squared distances when making KdTree, to avoid sqrt() inefficiency.
+
+
+HOW TO RUN ANY TESTS YOU WROTE/TRIED BY HAND
+
+JUnit tests can be run through Maven.
+System tests can be run by calling 'cs032_system_tester ./run ./tests/*' at the top directory
+
+
+HOW TO BUILD/RUN YOUR PROGRAM
+
+Use Maven to build the project. Then run by calling ./run [--gui] /path/to/stars.csv
+GUI server is at localhost:2345
+Command Line takes in commands just like the assignment specified
+
+
+ANSWERS TO DESIGN QUESTIONS
+
+SUPPOSE THAT IN ADDITION TO "NEIGHBORS" AND "RADIUS" YOU WANTED TO ADD A THIRD COMMAND. HOW WOULD YOU CHANGE YOUR CODE TO DO THIS? DON'T WORRY ABOUT ALGORITHMIC DETAILS WITH THE KDTREE, WE'RE INTERESTED IN THE DESIGN.
+
+In order to add a third command, you would first need to write the method that executes that command, which would most likely be put into KdTree. Then StarDataManager would need a new wrapper method to wrap that method for parsing, CommandParser would need new commands to parse the new parameters, and Commandline.cliCommand would need modification to incorporate the new method into its error checking. You would also need to write a new RESTful api url into SparkServer to execute StarDataManager's wrapper method, and some additonal HTML/JS to include options for that command and code to retrieve the response JSON from the server.
+
+WHAT ARE SOME PROBLEMS YOU WOULD RUN INTO IF YOU WANTED TO USE YOUR KDTREE TO FIND LATITUDE AND LONGITUDE POINTS THAT ARE CLOSE TO EACH OTHER ON THE EARTH'S SURFACE? YOU DO NOT NEED TO EXPLAIN HOW TO SOLVE THESE PROBLEMS.
+
+A big issue would be the distance formula used to insert into the tree. Due to wrap around at the International Dateline, there needs to be a way to measure distance as the shortest distance between two points on a sphere (like the haversine formula). This would make nearest-neighbor searches harder, since you would need to check if your search radius would include an area at that wrap-around.
+Additionally, distance between points on the globe are dependent on the latitude (closer to the equator, the more distance for every degrees of longitude). This would make the method of building the KdTree by each dimensional axis not as effective, since the two dimensions are dependent on each other to get actual distance.
+
+
+EXPLANATIONS FOR ANY CHECKSTYLE ERRORS YOUR CODE HAS
+
+Many of the checkstyle issues were declarations of @throw for Runtime Exceptions. The parser and coordinate classes throw or use methods that throw exceptions at runtime, for well-defined reasons. That is why I wanted to note them in the Javadocs.
+
+There were two redundant public modifiers for RangeSearchable. However, I feel that it adds clarity to the code. Additionally, the Coordinate interface also has public methods, and there were no checkstyle issues for that.
+
+Many of the magic numbers were server related, like the port or the 500 exception. The others were related to the parser, which needed to check and get parameters by index (5 and 3, and indexes between). There were also use of 3 to define dimensions of three for Star.
+
+There were some curly brace issues, one because I used a default method in an interface, and another for defining a type of a list for JSON serialization in SparkServer.

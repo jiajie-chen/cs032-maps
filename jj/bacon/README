@@ -1,0 +1,48 @@
+KNOWN BUGS
+
+GUI doesn't work, and only has autocorrection on homepage.
+
+DESIGN DETAILS SPECIFIC TO YOUR CODE
+
+I implemented --port
+
+ANY RUNTIME/SPACE OPTIMIZATIONS YOU MADE BEYOND THE MINIMUM REQUIREMENTS
+
+I cache the information I pull from the SQLite database into a graph. I also intern Actor and Movie objects.
+
+HOW TO RUN ANY TESTS YOU WROTE/TRIED BY HAND
+
+JUnit tests can be run through Maven. I didn't include tests from Autocorrect.
+JUnit tests were for just the base data structures (PathFinder and Graph), others were tested by the system tests.
+
+System tests can be run by calling 'cs032_system_tester ./run ./tests/*' at the top directory
+System tests need their ARG files changed to point to the SQL database
+
+
+HOW TO BUILD/RUN YOUR PROGRAM
+
+Use Maven to build the project. Then run by calling ./run with the appropriate command line flags.
+
+ANSWERS TO DESIGN QUESTIONS
+
+1. The developer would just have to create a new PathFinder implementation that can be used by BaconManager.
+They would have to make sure the types matched, and that it supported the conditions of PathFinder.
+
+2. I would make a new BaconRepository that could handle that data source, and a new command in BaconManager.Builder to use that repository.
+Since BaconRepository is meant to be extended to take in various file, this wouldn't be too hard.
+
+3. Since the chain of movies have to go in chronological order, this means writing a new PathFinder implementation.
+Since movies are edges, going in chronological order by movies means node to node traversal depends on the last edge traversed.
+The PathFinder implementation must be able to store past edges to travel the graph accordingly.
+
+
+EXPLANATIONS FOR ANY CHECKSTYLE ERRORS YOUR CODE HAS
+
+Main and SparkServer have a magic number, for the length of the arguments passed in, and server error codes.
+For Suggester and Frequency: Got an exception - expecting EOF (I think this is because i wrote a default method right above it)
+There were some curly brace issues, one because I used a default method in an interface, and another for defining a type of a list for JSON serialization in SparkServer.
+
+SqlBaconRepository has repeated code, due to similar code being used to generate queries.
+However, since the queries were command specific, there wasn't a way to put them in functions.
+
+FindBugs says some inner classes should be static, but they're meant to be instantiated with new, so it wouldn;t make sense to make them static.

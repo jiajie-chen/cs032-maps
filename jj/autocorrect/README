@@ -1,0 +1,58 @@
+KNOWN BUGS
+
+No known bugs
+
+DESIGN DETAILS SPECIFIC TO YOUR CODE
+
+I used AngularJS for dynamically responding to and validating user input, and for JSON requests.
+I stored abbreviations (can't, etc.) as separate words (can and t).
+
+
+ANY RUNTIME/SPACE OPTIMIZATIONS YOU MADE BEYOND THE MINIMUM REQUIREMENTS
+
+Used a HashMap for storing word frequencies.
+
+
+HOW TO RUN ANY TESTS YOU WROTE/TRIED BY HAND
+
+JUnit tests can be run through Maven.
+System tests can be run by calling 'cs032_system_tester ./run ./tests/*' at the top directory
+
+System tests need their ARG files changed to point to the corpora in the autocorrect/src/test directory
+
+
+HOW TO BUILD/RUN YOUR PROGRAM
+
+Use Maven to build the project. Then run by calling ./run with the appropriate command line flags.
+GUI server is at localhost:4567/autocorrect
+Command Line takes in commands just like the assignment specified
+
+
+ANSWERS TO DESIGN QUESTIONS
+
+HOW WOULD YOU CHANGE YOUR FRONTEND/BACKEND CODE SO THAT YOU COULD HANDLE AUTOCORRECTING MULTIPLE INPUT FIELDS ON THE SAME PAGE? WOULD YOU NEED TO MAKE ANY CHANGES?
+
+Since the backend just handles any queries given, regardless of number, only the frontend would need to be changed. There would need to be a new input and output field created, and the javascript would need to have a new $watch command for that input, set to fire a query for that input; that query function also needs to be changed to take in different input fields and allocate the results to different outputs.
+
+SUPPOSE SOME NEW LETTER, Θ, HAS BEEN INTRODUCED INTO THE ENGLISH ALPHABET. THIS LETTER CAN BE APPENDED TO THE END OF ANY ENGLISH WORD, TO NEGATE IT. FOR EXAMPLE, BADΘ WOULD MEAN "GOOD". WE ARE ASKING ABOUT THE EFFECTS OF THIS 1984-ESQUE VOCABULARILY ENHANCED UNIVERSE ON THE SIZE OF YOUR TRIE. YOU WILL NOW NEED TO STORE TWICE AS MANY WORDS IN YOUR TRIE AS BEFORE. HOW MANY MORE NODES WILL YOU NEED TO STORE IN YOUR TRIE? WE ARE LOOKING FOR YOU TO SUPPORT YOUR ANSWER WITH DETAILS ABOUT HOW YOUR TRIE IS IMPLEMENTED AND WHAT DATA IT STORES.
+
+The number of nodes would increase by the number of words currenlty stored in the trie.
+This is because the trie stores each prefix as a branch, collapsing the same prefix into a branch.
+Since the words would already be in the trie, adding an additional letter to every word is the same as adding a new node to the end of every word node in the trie.
+
+
+EXPLANATIONS FOR ANY CHECKSTYLE ERRORS YOUR CODE HAS
+
+There were declarations of @throw for Runtime Exceptions. Some classes throw or use methods that throw exceptions at runtime, for well-defined reasons. That is why I wanted to note them in the Javadocs.
+
+There were some curly brace issues, one because I used a default method in an interface, and another for defining a type of a list for JSON serialization in SparkServer.
+
+
+WHAT YOUR SMART SUGGESTION DOES AND HOW IT IMPROVES THE CURRENT SUGGESTION
+
+My suggestion uses a set of weights for ranking suggestions.
+Suggestions first get a weighting by the exact matches, bigram frequencies, unigram frequencies, and the first letter of the suggestion.
+Next, they get weighted by the type of suggestion (Levenshtein, Prefix, Whitespace), using the number of changes (or length of the left word, for Whitespace) as the compared value.
+The weights of the suggestions are used to rank them.
+
+This allows tweaking of each aspect of an autocorrector, allowing for different behaviors. Weighting towards Prefix suggestions means a preference for autocompletion over correction, for example. Weighting for Levenshtein means a preference for correcting single words.
