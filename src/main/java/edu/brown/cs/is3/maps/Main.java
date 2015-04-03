@@ -77,13 +77,17 @@ public class Main implements Runnable {
   }
 
   /**
-   * Checks if an individual string is a double.
+   * Checks if an individual string is a finite double.
    * @param value to check.
    * @return true if is a double and false otherwise.
    */
   private static boolean isDouble(String value) {
     try {
-      Double.parseDouble(value);
+      double d = Double.parseDouble(value);
+      if (!Double.isFinite(d)) {
+        return false;
+      }
+
       return true;
     } catch (NumberFormatException e) {
       return false;
