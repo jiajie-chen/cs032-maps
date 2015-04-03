@@ -18,7 +18,7 @@ public class SuggestionHelper {
   private static final int MAX_SUGGESTIONS = 5;
 
   public void fill(Database db) {
-    for (String name : db.allStreetNames()) {
+    for (String name : db.allWayNames()) {
       dict.insert(name);
       int count = unifreqs.containsKey(name) ? unifreqs.get(name) : 0;
       unifreqs.put(name, count + 1);

@@ -123,6 +123,7 @@ form.searchForm {
   width: 100%;
   position: relative;
   border:2px solid #000000; /*will probably look cooler delete*/
+  margin-top: -5em;
 }
 
 #mainCanvas {

@@ -63,7 +63,7 @@ public class Trie implements Iterable<String> {
       return;
     }
 
-    Pattern p = Pattern.compile("^[a-zA-Z'-\\. ]+");
+    Pattern p = Pattern.compile("^[a-zA-Z0-9'-\\. ]+$");
     Matcher m = p.matcher(s);
     if (!m.find()) {
       return;
