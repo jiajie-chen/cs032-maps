@@ -22,6 +22,8 @@ import spark.Spark;
 public class Main implements Runnable {
   private final String[] args;
   private int sparkPort;
+  private Database db;
+
   private static final int DEFAULT_PORT = 3141;
   private static final int EXPECTED_ARGS = 4;
 
