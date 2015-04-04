@@ -10,8 +10,6 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
-import spark.Spark;
-
 /**
  * Main class implementing maps, including shortest path searches, auto
  * correction, and nearest neighbor searches based on both the command line and
@@ -191,11 +189,8 @@ public class Main implements Runnable {
    * Luanches a spark server to allow for GUI querying of maps.
    */
   private void runSparkServer() {
-    Spark.setPort(sparkPort);
-    Spark.externalStaticFileLocation("src/main/resources/static");
-    // Spark.get("/autocorrect", new GetHandler(), new FreeMarkerEngine());
-    // Spark.post("/suggestions", new SuggestionHandler());
-    // TODO
+    Server s = new Server(this, sparkPort);
+    s.run();
   }
 
 }
