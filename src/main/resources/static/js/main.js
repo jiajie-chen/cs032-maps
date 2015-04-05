@@ -153,6 +153,16 @@
     });
   }
 
+  function hideSuggestions() {
+    $('.ebox').each(function(i, obj) {
+      $(this).hide();
+    });
+
+    $('.sbox').each(function(i, obj) {
+      $(this).hide();
+    });
+  }
+
  //  function displayError(error) {
  //    var displayParagraph = document.getElementById('results');
  //    displayParagraph.innerHTML = error;

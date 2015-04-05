@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -16,6 +17,8 @@ import java.util.Set;
 public class Database {
   private final String urlToDB;
   private final Connection conn;
+  private final Map<String, Way> wayById;
+  private final Map<String, Way> nodeById;
 
   /**
    * Constructs a db.
@@ -40,6 +43,10 @@ public class Database {
     }
   }
 
+  /**
+   * Generates a list of all the way names in the database.
+   * @return list of way names.
+   */
   public Set<String> allWayNames() {
     Set<String> toReturn = new HashSet<>();
 
@@ -59,7 +66,16 @@ public class Database {
     return toReturn;
   }
 
+  /**
+   * Searches for and returns the node with the given id;
+   * @param id to search for.
+   * @return the node with that id.
+   */
   public Node nodeOfId(String id) {
+    if (nodeById.get(id) != null) {
+      return nodeById.get(id);
+    }
+
     String nodeQuery = "SELECT latitude, longitude FROM node WHERE id = ? LIMIT 1";
 
     try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery)) {
@@ -82,7 +98,9 @@ public class Database {
           throw new RuntimeException("ERROR: No node with that id.");
         }
 
-        return new Node(new LatLng(id, lat, lng));
+        Node toReturn = new Node(new LatLng(id, lat, lng));
+        nodeById.put(id, toReturn);
+        return toReturn;
       }
     } catch (SQLException e) {
       close();
@@ -90,7 +108,16 @@ public class Database {
     }
   }
 
+  /**
+   * Searches for and returns the way with the given id;
+   * @param id to search for.
+   * @return the way with that id.
+   */
   public Way wayOfId(String id) {
+    if (wayById.get(id) != null) {
+      return wayById.get(id);
+    }
+
     String wayQuery = "SELECT name, start, end FROM way WHERE id = ? LIMIT 1";
 
     try (PreparedStatement wayPS = conn.prepareStatement(wayQuery)) {
@@ -115,7 +142,9 @@ public class Database {
           throw new RuntimeException("ERROR: No way with that id.");
         }
 
-        return new Way(id, name, startID, endID); // maybe should build nodes!!
+        Way toReturn = new Way(id, name, startID, endID);
+        wayById.put(id, toReturn);
+        return toReturn; // maybe should build nodes!!
       }
     } catch (SQLException e) {
       close();
@@ -123,6 +152,11 @@ public class Database {
     }
   }
 
+  /**
+   * Searches for and returns the way with the given name;
+   * @param name to search for.
+   * @return the way with that name.
+   */
   public Way wayOfName(String name) {
     String wayQuery = "SELECT id, start, end FROM way WHERE name = ? LIMIT 1";
 
@@ -143,7 +177,9 @@ public class Database {
           throw new RuntimeException("ERROR: No way with that name.");
         }
 
-        return new Way(id, name, startID, endID); // maybe should build nodes!!
+        Way toReturn = new Way(id, name, startID, endID);
+        wayById.put(id, toReturn);
+        return toReturn; // maybe should build nodes!!
       }
     } catch (SQLException e) {
       close();
