@@ -3,6 +3,7 @@ package edu.brown.cs.is3.maps;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.SQLException;
 import java.util.List;
 
 import joptsimple.OptionException;
@@ -119,6 +120,13 @@ public class Main implements Runnable {
       dbPath = options.valueOf(dbSpec);
     } catch (OptionException e) {
       printUsage();
+      return;
+    }
+
+    try {
+      db = new Database(dbPath);
+    } catch (ClassNotFoundException | SQLException e1) {
+      System.err.println("Error: Invalid database.");
       return;
     }
 
