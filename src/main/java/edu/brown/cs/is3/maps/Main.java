@@ -8,6 +8,8 @@ import java.util.List;
 
 import com.javadocmd.simplelatlng.LatLng;
 
+import edu.brown.cs.is3.autocorrect.SuggestionHelper;
+
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -133,6 +135,7 @@ public class Main implements Runnable {
     }
 
     if (options.has("gui")) {
+
       runSparkServer();
     } else {
       try {
@@ -203,8 +206,9 @@ public class Main implements Runnable {
    * Luanches a spark server to allow for GUI querying of maps.
    */
   private void runSparkServer() {
-    Server s = new Server(this, sparkPort);
+    SuggestionHelper sh = new SuggestionHelper();
+    sh.fill(db);
+    Server s = new Server(this, sparkPort, sh);
     s.run();
   }
-
 }
