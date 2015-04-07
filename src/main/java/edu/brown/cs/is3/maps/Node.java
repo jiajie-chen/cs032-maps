@@ -4,8 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
-
-import edu.brown.cs.is3.cartesian.LatLng;
+import com.javadocmd.simplelatlng.LatLng;
+import com.javadocmd.simplelatlng.LatLngTool;
+import com.javadocmd.simplelatlng.util.LengthUnit;
 
 /**
  * Class representing a node object in the database;
@@ -39,7 +40,7 @@ public class Node {
   }
 
   public double getDistance(Node end) {
-    return this.pos.getDistance(end.pos);
+    return LatLngTool.distance(this.pos, end.pos, LengthUnit.MILE);
   }
 
   /**

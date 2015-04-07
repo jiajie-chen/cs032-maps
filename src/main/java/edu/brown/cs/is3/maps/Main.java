@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.List;
 
-import edu.brown.cs.is3.cartesian.LatLng;
+import com.javadocmd.simplelatlng.LatLng;
 
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
@@ -179,7 +179,7 @@ public class Main implements Runnable {
         return;
       } else {
         if (containsDoubles(argsList)) {
-          LatLng start = new LatLng(
+          com.javadocmd.simplelatlng.LatLng start = new LatLng(
               Double.parseDouble(argsList.get(0)),
               Double.parseDouble(argsList.get(1)));
           LatLng end = new LatLng(

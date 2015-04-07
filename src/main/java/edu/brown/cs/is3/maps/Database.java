@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import edu.brown.cs.is3.cartesian.LatLng;
+import com.javadocmd.simplelatlng.LatLng;
 
 /**
  * Class for interacting with the maps database and building objects from data.
