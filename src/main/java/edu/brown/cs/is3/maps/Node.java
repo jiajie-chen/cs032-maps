@@ -5,6 +5,8 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 
+import edu.brown.cs.is3.cartesian.LatLng;
+
 /**
  * Class representing a node object in the database;
  * @author is3
@@ -34,6 +36,10 @@ public class Node {
   public Node(String id, double lat, double lng) {
     this.id = id;
     this.pos = new LatLng(lat, lng);
+  }
+
+  public double getDistance(Node end) {
+    return this.pos.getDistance(end.pos);
   }
 
   /**

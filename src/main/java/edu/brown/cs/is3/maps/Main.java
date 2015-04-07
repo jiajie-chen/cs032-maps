@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.List;
 
+import edu.brown.cs.is3.cartesian.LatLng;
+
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -177,8 +179,12 @@ public class Main implements Runnable {
         return;
       } else {
         if (containsDoubles(argsList)) {
-          LatLng start = new LatLng(argsList.get(0), argsList.get(1));
-          LatLng end = new LatLng(argsList.get(2), argsList.get(3));
+          LatLng start = new LatLng(
+              Double.parseDouble(argsList.get(0)),
+              Double.parseDouble(argsList.get(1)));
+          LatLng end = new LatLng(
+              Double.parseDouble(argsList.get(2)),
+              Double.parseDouble(argsList.get(3)));
           // TODO
         } else {
           String startStreet = argsList.get(0);

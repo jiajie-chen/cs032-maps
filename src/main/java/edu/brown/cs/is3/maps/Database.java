@@ -5,9 +5,12 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import edu.brown.cs.is3.cartesian.LatLng;
 
 /**
  * Class for interacting with the maps database and building objects from data.
@@ -17,8 +20,8 @@ import java.util.Set;
 public class Database {
   private final String urlToDB;
   private final Connection conn;
-  private final Map<String, Way> wayById;
-  private final Map<String, Way> nodeById;
+  private final Map<String, Way> wayById = new HashMap<>();
+  private final Map<String, Node> nodeById = new HashMap<>();
 
   /**
    * Constructs a db.
@@ -76,10 +79,15 @@ public class Database {
       return nodeById.get(id);
     }
 
-    String nodeQuery = "SELECT latitude, longitude FROM node WHERE id = ? LIMIT 1";
+    Node toReturn;
 
-    try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery)) {
+    String nodeQuery = "SELECT latitude, longitude FROM node WHERE id = ? LIMIT 1";
+    String wayQuery = "SELECT id, name, end FROM way WHERE start = ?;";
+
+    try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery);
+        PreparedStatement wayPS = conn.prepareStatement(wayQuery)) {
       nodePS.setString(1, id);
+      wayPS.setString(1, id);
 
       try (ResultSet nodeRS = nodePS.executeQuery()) {
         Double lat;
@@ -98,7 +106,20 @@ public class Database {
           throw new RuntimeException("ERROR: No node with that id.");
         }
 
-        Node toReturn = new Node(new LatLng(id, lat, lng));
+        toReturn = new Node(id, new LatLng(lat, lng));
+
+        try (ResultSet wayRS = wayPS.executeQuery()) {
+          while (wayRS.next()) {
+            String wayId = wayRS.getString(1);
+            String name = wayRS.getString(2);
+            String endId = wayRS.getString(3);
+
+            Way w = new Way(wayId, name, id, endId);
+            wayById.put(wayId, w);
+            toReturn.addWay(w);
+          }
+        }
+
         nodeById.put(id, toReturn);
         return toReturn;
       }
