@@ -45,7 +45,6 @@ public class Main implements Runnable {
   public static void main(String[] args) {
     Main m = new Main(args);
     m.run();
-
     return;
   }
 
@@ -117,7 +116,13 @@ public class Main implements Runnable {
       return;
     }
 
-    sparkPort = (int) options.valueOf("port");
+    try {
+      sparkPort = (int) options.valueOf("port");
+    } catch (OptionException e) {
+      printUsage();
+      return;
+    }
+
     String dbPath;
 
     try {
@@ -127,21 +132,27 @@ public class Main implements Runnable {
       return;
     }
 
+    if (dbPath == null || dbPath.isEmpty()) {
+      printUsage();
+      return;
+    }
+
     try {
       db = new Database(dbPath);
     } catch (ClassNotFoundException | SQLException e1) {
-      System.err.println("Error: Invalid database.");
+      System.err.println("Error: " + e1.getMessage());
       return;
     }
 
     if (options.has("gui")) {
-
       runSparkServer();
     } else {
       try {
         processQueries();
       } catch (IOException e) {
         System.err.println("Error: " + e.getMessage());
+        db.close();
+        return;
       }
     }
   }
@@ -155,16 +166,15 @@ public class Main implements Runnable {
     String s = r.readLine();
 
     while (s != null && s.length() != 0) {
-      s = r.readLine();
-
       OptionParser parser = new OptionParser();
       OptionSpec<String> argsSpec = parser.nonOptions().ofType(String.class);
       OptionSet options;
 
       try {
-        options = parser.parse(args);
+        options = parser.parse(s.split("\\s+"));
       } catch (OptionException e) {
         printREPLUsage();
+        db.close();
         return;
       }
 
@@ -173,12 +183,17 @@ public class Main implements Runnable {
       try {
         argsList = options.valuesOf(argsSpec);
       } catch (OptionException e) {
+        System.out
+            .println(" FAILED HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");//
         printREPLUsage();
+        db.close();
         return;
       }
+      System.out.println("GOT: " + argsList); // ///////////////////////
 
       if (argsList.size() != EXPECTED_ARGS) {
         printREPLUsage();
+        db.close();
         return;
       } else {
         if (containsDoubles(argsList)) {
@@ -188,17 +203,23 @@ public class Main implements Runnable {
           LatLng end = new LatLng(
               Double.parseDouble(argsList.get(2)),
               Double.parseDouble(argsList.get(3)));
+
+          System.out.println("" + start + end); // ////////////
           // TODO
-        } else {
+        } else { // maybe needs checks for "" or regexes somewhere!!!!!!!
           String startStreet = argsList.get(0);
           String startCross = argsList.get(1);
           String endStreet = argsList.get(2);
           String endCross = argsList.get(3);
           // TODO
+          System.out.println(argsList); // //////////////
         }
       }
+
+      s = r.readLine();
     }
 
+    db.close();
     return;
   }
 
@@ -207,7 +228,14 @@ public class Main implements Runnable {
    */
   private void runSparkServer() {
     SuggestionHelper sh = new SuggestionHelper();
-    sh.fill(db);
+    try {
+      sh.fill(db);
+    } catch (RuntimeException e) {
+      System.err.println("ERROR: " + e.getMessage());
+      db.close();
+      return;
+    }
+
     Server s = new Server(this, sparkPort, sh);
     s.run();
   }

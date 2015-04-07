@@ -33,6 +33,9 @@ public class Database {
     Class.forName("org.sqlite.JDBC");
     this.urlToDB = "jdbc:sqlite:" + path;
     this.conn = DriverManager.getConnection(this.urlToDB);
+    if (conn == null || conn.isClosed()) {
+      throw new SQLException("Failed to create a database at path: " + path);
+    }
   }
 
   /**
@@ -63,7 +66,7 @@ public class Database {
       }
     } catch (SQLException e) {
       close();
-      throw new RuntimeException("ERROR: Failed to generate full way list.");
+      throw new RuntimeException("Failed to generate full way list.");
     }
 
     return toReturn;
@@ -99,11 +102,11 @@ public class Database {
 
           if (nodeRS.next()) {
             close();
-            throw new RuntimeException("ERROR: Multiple nodes with that id.");
+            throw new RuntimeException("Multiple nodes with that id.");
           }
         } else {
           close();
-          throw new RuntimeException("ERROR: No node with that id.");
+          throw new RuntimeException("No node with that id.");
         }
 
         toReturn = new Node(id, new LatLng(lat, lng));
@@ -156,11 +159,11 @@ public class Database {
 
           if (wayRS.next()) {
             close();
-            throw new RuntimeException("ERROR: Multiple ways with that id.");
+            throw new RuntimeException("Multiple ways with that id.");
           }
         } else {
           close();
-          throw new RuntimeException("ERROR: No way with that id.");
+          throw new RuntimeException("No way with that id.");
         }
 
         Way toReturn = new Way(id, name, startID, endID);
@@ -195,7 +198,7 @@ public class Database {
           endID = wayRS.getString(3);
         } else {
           close();
-          throw new RuntimeException("ERROR: No way with that name.");
+          throw new RuntimeException("No way with that name.");
         }
 
         Way toReturn = new Way(id, name, startID, endID);
