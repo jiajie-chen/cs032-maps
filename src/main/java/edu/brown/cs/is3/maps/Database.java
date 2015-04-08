@@ -1,5 +1,6 @@
 package edu.brown.cs.is3.maps;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -30,6 +31,11 @@ public class Database {
    * @throws SQLException on database error.
    */
   public Database(String path) throws ClassNotFoundException, SQLException {
+    File f = new File(path);
+    if (!f.exists() || !f.isFile()) {
+      throw new SQLException("Invalid database file: " + path);
+    }
+
     Class.forName("org.sqlite.JDBC");
     this.urlToDB = "jdbc:sqlite:" + path;
     this.conn = DriverManager.getConnection(this.urlToDB);
@@ -99,11 +105,6 @@ public class Database {
         if (nodeRS.next()) {
           lat = Double.parseDouble(nodeRS.getString(1));
           lng = Double.parseDouble(nodeRS.getString(2));
-
-          if (nodeRS.next()) {
-            close();
-            throw new RuntimeException("Multiple nodes with that id.");
-          }
         } else {
           close();
           throw new RuntimeException("No node with that id.");
@@ -156,11 +157,6 @@ public class Database {
           name = wayRS.getString(1);
           startID = wayRS.getString(2);
           endID = wayRS.getString(3);
-
-          if (wayRS.next()) {
-            close();
-            throw new RuntimeException("Multiple ways with that id.");
-          }
         } else {
           close();
           throw new RuntimeException("No way with that id.");
@@ -204,6 +200,51 @@ public class Database {
         Way toReturn = new Way(id, name, startID, endID);
         wayById.put(id, toReturn);
         return toReturn; // maybe should build nodes!!
+      }
+    } catch (SQLException e) {
+      close();
+      throw new RuntimeException(e);
+    }
+  }
+
+  public Node nodeOfIntersection(String streetName, String crossName) {
+    String interQuery = "SELECT street.start FROM way AS street INNER JOIN way AS cross "
+        + "ON street.start = cross.start WHERE "
+        + "(street.name = ? AND cross.name = ?) OR (street.name = ? AND cross.name = ?) "
+        + "UNION "
+        + "SELECT street.start FROM way AS street INNER JOIN way AS cross "
+        + "ON street.start = cross.end WHERE "
+        + "(street.name = ? AND cross.name = ?) OR (street.name = ? AND cross.name = ?) "
+        + "UNION "
+        + "SELECT street.end FROM way AS street INNER JOIN way AS cross "
+        + "ON street.end = cross.start WHERE "
+        + "(street.name = ? AND cross.name = ?) OR (street.name = ? AND cross.name = ?) "
+        + "UNION "
+        + "SELECT street.end FROM way AS street INNER JOIN way AS cross "
+        + "ON street.end = cross.end WHERE "
+        + "(street.name = ? AND cross.name = ?) OR (street.name = ? AND cross.name = ?) "
+        + "LIMIT 1;";
+
+    try (PreparedStatement interPS = conn.prepareStatement(interQuery)) {
+      for (int i = 1; i < 17; i += 4) {
+        interPS.setString(i, streetName);
+        interPS.setString(i + 1, crossName);
+        interPS.setString(i + 2, crossName);
+        interPS.setString(i + 3, streetName);
+      }
+
+      try (ResultSet interRS = interPS.executeQuery()) {
+        String nodeID;
+
+        if (interRS.next()) {
+          nodeID = interRS.getString(1);
+        } else {
+          close();
+          throw new RuntimeException("No intersection between " + streetName
+              + " and " + crossName + ".");
+        }
+
+        return nodeOfId(nodeID);
       }
     } catch (SQLException e) {
       close();
