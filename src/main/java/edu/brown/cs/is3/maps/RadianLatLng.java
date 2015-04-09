@@ -6,14 +6,14 @@ import edu.brown.cs.jc124.kdtree.DimensionMismatchException;
 /**
  * @author jchen
  *
- *         Class that stores 2-dimensional latitude and longitudes, as radians.
+ *         Class that stores 2-dimensional latitude and longitudes, as radians. Distances are in miles.
  */
 public class RadianLatLng implements Coordinate {
   // probably will never change, but good convention I guess
   public static final int LATLNG_DIM = 2;
   public static final int LAT_AXIS = 0;
   public static final int LNG_AXIS = 1;
-  // earth's radius, for distances
+  // earth's radius, for distances (in mile)
   private static final int EARTH_RADIUS = 6371000;
   
   private double lat, lng;

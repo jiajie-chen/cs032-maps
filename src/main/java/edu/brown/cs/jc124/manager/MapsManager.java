@@ -2,6 +2,7 @@ package edu.brown.cs.jc124.manager;
 
 import edu.brown.cs.is3.autocorrect.SuggestionHelper;
 import edu.brown.cs.is3.maps.Database;
+import edu.brown.cs.is3.maps.RadianLatLng;
 
 /**
  * @author jchen
@@ -26,6 +27,8 @@ public class MapsManager {
     mapsKd.fill(db);
   }
   
-  public get
+  public List<Way> getPathByPoints(Node p1, Node p2) {
+    
+  }
 
 }
