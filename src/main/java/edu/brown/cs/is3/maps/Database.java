@@ -89,22 +89,22 @@ public class Database {
     }
 
     Node toReturn;
+    String nodeQuery = "SELECT way.id, way.name, way.end FROM way WHERE way.start = ? "
+        + "UNION "
+        + "SELECT node.id, node.latitude, node.longitude FROM node WHERE node.id = ? "
+        + "ORDER BY id;";
 
-    String nodeQuery = "SELECT latitude, longitude FROM node WHERE id = ? LIMIT 1;";
-    String wayQuery = "SELECT id, name, end FROM way WHERE start = ?;";
-
-    try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery);
-        PreparedStatement wayPS = conn.prepareStatement(wayQuery)) {
+    try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery)) {
       nodePS.setString(1, id);
-      wayPS.setString(1, id);
+      nodePS.setString(2, id);
 
       try (ResultSet nodeRS = nodePS.executeQuery()) {
         Double lat;
         Double lng;
 
         if (nodeRS.next()) {
-          lat = Double.parseDouble(nodeRS.getString(1));
-          lng = Double.parseDouble(nodeRS.getString(2));
+          lat = Double.parseDouble(nodeRS.getString(2));
+          lng = Double.parseDouble(nodeRS.getString(3));
         } else {
           close();
           throw new RuntimeException("No node with that id.");
@@ -112,16 +112,14 @@ public class Database {
 
         toReturn = new Node(id, new LatLng(lat, lng));
 
-        try (ResultSet wayRS = wayPS.executeQuery()) {
-          while (wayRS.next()) {
-            String wayId = wayRS.getString(1);
-            String name = wayRS.getString(2);
-            String endId = wayRS.getString(3);
+        while (nodeRS.next()) {
+          String wayId = nodeRS.getString(1);
+          String name = nodeRS.getString(2);
+          String endId = nodeRS.getString(3);
 
-            Way w = new Way(wayId, name, id, endId);
-            wayById.put(wayId, w);
-            toReturn.addWay(w);
-          }
+          Way w = new Way(wayId, name, id, endId);
+          wayById.put(wayId, w);
+          toReturn.addWay(w);
         }
 
         nodeById.put(id, toReturn);
@@ -207,6 +205,13 @@ public class Database {
     }
   }
 
+  /**
+   * Finds an intersection between two streets with a given name. If multiple
+   * such intersections exist, it returns one such intersection.
+   * @param streetName first street.
+   * @param crossName second street.
+   * @return
+   */
   public Node nodeOfIntersection(String streetName, String crossName) {
     String interQuery = "SELECT street.start FROM way AS street INNER JOIN way AS cross "
         + "ON street.start = cross.start WHERE "

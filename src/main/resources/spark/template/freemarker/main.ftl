@@ -3,11 +3,11 @@
   <head>
    
     <meta charset="utf-8">
-    <link rel="stylesheet" href="../../../static/css/normalize.css">
-    <link rel="stylesheet" href="../../../static/css/main.css">
+    <link rel="stylesheet" href="/css/normalize.css">
+    <link rel="stylesheet" href="/css/main.css">
     <link href="http://fonts.googleapis.com/css?family=Merienda+One" rel="stylesheet" type="text/css">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="../../../static/js/main.js"></script>
+    <script src="/js/main.js"></script>
     
     <title>${title}</title>
   </head>

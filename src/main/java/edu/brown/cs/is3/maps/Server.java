@@ -8,11 +8,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 
 import edu.brown.cs.is3.autocorrect.SuggestionHelper;
+import spark.ModelAndView;
 import spark.QueryParamsMap;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 import spark.Spark;
+import spark.TemplateViewRoute;
+import spark.template.freemarker.FreeMarkerEngine;
 
 /**
  * Server class hosting spark server.
@@ -35,11 +38,24 @@ public class Server implements Runnable {
   public void run() {
     Spark.setPort(port);
     Spark.externalStaticFileLocation("src/main/resources/static");
+    Spark.get("/maps", new GetHandler(), new FreeMarkerEngine());
     Spark.post("/suggestions", new SuggestionHandler());
-    // Spark.get("/home", new GetHandler(), new FreeMarkerEngine());
     // Spark.get("/film/m/:id", new FilmHandler(), new FreeMarkerEngine());
     // Spark.get("/actor/m/:id", new ActorHandler(), new FreeMarkerEngine());
     // Spark.post("/results", new ResultsHandler());
+  }
+
+  /**
+   * Handles requests for the main web page at /maps.
+   * @author is3
+   *
+   */
+  private static class GetHandler implements TemplateViewRoute {
+    @Override
+    public ModelAndView handle(Request req, Response res) {
+      Map<String, Object> variables = ImmutableMap.of("title", "Maps");
+      return new ModelAndView(variables, "main.ftl");
+    }
   }
 
   /**
@@ -92,18 +108,6 @@ public class Server implements Runnable {
 // return GSON.toJson(message);
 // }
 //
-// /**
-// * Handles requests for the main web page at /home.
-// * @author is3
-// *
-// */
-// private static class GetHandler implements TemplateViewRoute {
-// @Override
-// public ModelAndView handle(Request req, Response res) {
-// Map<String, Object> variables = ImmutableMap.of("title", "Bacon");
-// return new ModelAndView(variables, "main.ftl");
-// }
-// }
 //
 // /**
 // * Handles actor queries.

@@ -39,6 +39,12 @@ public class Node {
     this.pos = new LatLng(lat, lng);
   }
 
+  /**
+   * Finds the distance along the surface of the globe from this node to another
+   * node.
+   * @param end other node to move towards.
+   * @return distance along the globe between this and end.
+   */
   public double getDistance(Node end) {
     return LatLngTool.distance(this.pos, end.pos, LengthUnit.MILE);
   }

@@ -34,7 +34,65 @@
       });
     });
 
- //    eb.addEventListener("keydown", function(event) {
+  function displayStart(suggestionsList) {
+    // var hide = $("#hide").is(":checked");
+    if (suggestionsList == null || suggestionsList.length == 0) {
+      $('.sbox').each(function(i, obj) {
+        $(this).hide();
+      });
+
+      return;
+    }
+
+    $('.sbox').each(function(i, obj) {
+      var hide = false;
+      obj.value = suggestionsList[i];
+      if (hide || i >= suggestionsList.length) {
+        $(this).hide();
+      } else {
+        $(this).show();
+      }
+    });
+  }
+
+  function displayEnd(suggestionsList) {
+    // var hide = $("#hide").is(":checked");
+    if (suggestionsList == null || suggestionsList.length == 0) {
+      $('.ebox').each(function(i, obj) {
+        $(this).hide();
+      });
+
+      return;
+    }
+
+    $('.ebox').each(function(i, obj) {
+      var hide = false;
+      obj.value = suggestionsList[i];
+      if (hide || i >= suggestionsList.length) {
+        $(this).hide();
+      } else {
+        $(this).show();
+      }
+    });
+  }
+
+  function hideSuggestions() {
+    $('.ebox').each(function(i, obj) {
+      $(this).hide();
+    });
+
+    $('.sbox').each(function(i, obj) {
+      $(this).hide();
+    });
+  }
+});
+
+ //  function displayError(error) {
+ //    var displayParagraph = document.getElementById('results');
+ //    displayParagraph.innerHTML = error;
+ //  }
+
+  //    eb.addEventListener("keydown", function(event) {
  //      if (event.keyCode != 13) {
  //        return;
  //      }
@@ -110,60 +168,3 @@
  //    displayParagraph.appendChild(line);
  //  };
  // }
-
-  function displayStart(suggestionsList) {
-    // var hide = $("#hide").is(":checked");
-    if (suggestionsList == null || suggestionsList.length == 0) {
-      $('.sbox').each(function(i, obj) {
-        $(this).hide();
-      });
-
-      return;
-    }
-
-    $('.sbox').each(function(i, obj) {
-      var hide = false;
-      obj.value = suggestionsList[i];
-      if (hide || i >= suggestionsList.length) {
-        $(this).hide();
-      } else {
-        $(this).show();
-      }
-    });
-  }
-
-  function displayEnd(suggestionsList) {
-    // var hide = $("#hide").is(":checked");
-    if (suggestionsList == null || suggestionsList.length == 0) {
-      $('.ebox').each(function(i, obj) {
-        $(this).hide();
-      });
-
-      return;
-    }
-
-    $('.ebox').each(function(i, obj) {
-      var hide = false;
-      obj.value = suggestionsList[i];
-      if (hide || i >= suggestionsList.length) {
-        $(this).hide();
-      } else {
-        $(this).show();
-      }
-    });
-  }
-
-  function hideSuggestions() {
-    $('.ebox').each(function(i, obj) {
-      $(this).hide();
-    });
-
-    $('.sbox').each(function(i, obj) {
-      $(this).hide();
-    });
-  }
-
- //  function displayError(error) {
- //    var displayParagraph = document.getElementById('results');
- //    displayParagraph.innerHTML = error;
- //  }
