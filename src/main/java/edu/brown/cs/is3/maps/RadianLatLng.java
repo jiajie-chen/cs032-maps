@@ -78,7 +78,7 @@ public class RadianLatLng implements Coordinate {
     if (c instanceof RadianLatLng) {
       return haversine((RadianLatLng) c);
     } else {
-      throw new DimensionMismatchException("this LatLng can only get distance to another LatLng");
+      throw new DimensionMismatchException("this RadianLatLng can only get distance to another RadianLatLng");
     }
   }
   
@@ -107,6 +107,7 @@ public class RadianLatLng implements Coordinate {
     return d;
   }
   
+  /*
   // faster square distance approximator using equirectangular projection
   private double equirectangularSq(RadianLatLng l) {
     // phi is lat, lambda is lng
@@ -123,6 +124,7 @@ public class RadianLatLng implements Coordinate {
     double d2 = EARTH_RADIUS * EARTH_RADIUS * (x*x + y*y);
     return d2;
   }
+  //*/
 
   @Override
   public int getDimensions() {

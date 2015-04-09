@@ -1,8 +1,12 @@
 package edu.brown.cs.jc124.manager;
 
+import java.util.List;
+
 import edu.brown.cs.is3.autocorrect.SuggestionHelper;
+import edu.brown.cs.is3.graph.Graph;
 import edu.brown.cs.is3.maps.Database;
-import edu.brown.cs.is3.maps.RadianLatLng;
+import edu.brown.cs.is3.maps.Node;
+import edu.brown.cs.is3.maps.Way;
 
 /**
  * @author jchen
@@ -12,7 +16,7 @@ import edu.brown.cs.is3.maps.RadianLatLng;
 public class MapsManager {
   private Database db;
   private SuggestionHelper autocorrect;
-  private KdTreeManager mapsKd;
+  private KdTreeHelper mapsKd;
   
   /**
    * @param db
@@ -23,12 +27,40 @@ public class MapsManager {
     autocorrect = new SuggestionHelper();
     autocorrect.fill(db);
     
-    
+    mapsKd = new KdTreeHelper();
     mapsKd.fill(db);
   }
   
-  public List<Way> getPathByPoints(Node p1, Node p2) {
+  private List<Way> getShortestPath(Node start, Node end) {
+    Graph g = new Graph(db);
+    List<Way> path = null;
     
+    path = g.dijkstras(start, end);
+    return path;
   }
-
+  
+  /**
+   * @param closest
+   * @return
+   */
+  public List<Way> getPathByPoints(Node closestStart, Node closestEnd) {
+    Node start = mapsKd.getPointClosest(closestStart);
+    Node end = mapsKd.getPointClosest(closestEnd);
+    
+    return getShortestPath(start, end);
+  }
+  
+  /**
+   * @param startStreet
+   * @param startCross
+   * @param endStreet
+   * @param endCross
+   * @return
+   */
+  public List<Way> getPathByIntersections(String startStreet, String startCross, String endStreet, String endCross) {
+    Node start = db.nodeOfIntersection(startStreet, startCross);
+    Node end = db.nodeOfIntersection(endStreet, endCross);
+    
+    return getShortestPath(start, end);
+  }
 }

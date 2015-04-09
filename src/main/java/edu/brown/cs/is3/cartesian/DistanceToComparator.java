@@ -27,8 +27,8 @@ public class DistanceToComparator implements Comparator<Node> {
 
   @Override
   public int compare(Node n, Node m) {
-    double nTotal = distances.get(n) + n.getDistance(target);
-    double mTotal = distances.get(m) + m.getDistance(target);
+    double nTotal = distances.get(n) + n.distance(target);
+    double mTotal = distances.get(m) + m.distance(target);
 
     return Double.compare(nTotal, mTotal);
   }

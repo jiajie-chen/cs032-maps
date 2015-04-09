@@ -11,8 +11,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.javadocmd.simplelatlng.LatLng;
-
 /**
  * Class for interacting with the maps database and building objects from data.
  * @author is3
@@ -110,7 +108,7 @@ public class Database {
           throw new RuntimeException("No node with that id.");
         }
 
-        toReturn = new Node(id, new LatLng(lat, lng));
+        toReturn = new Node(id, new RadianLatLng(lat, lng));
 
         while (nodeRS.next()) {
           String wayId = nodeRS.getString(1);
@@ -255,5 +253,10 @@ public class Database {
       close();
       throw new RuntimeException(e);
     }
+  }
+
+  public Set<Node> allNodes() {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

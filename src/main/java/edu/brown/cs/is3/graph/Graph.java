@@ -64,14 +64,14 @@ public class Graph {
         return generateSolution(curr, parents);
       }
 
-      closed.put(curr, distances.get(curr) + curr.getDistance(end));
+      closed.put(curr, distances.get(curr) + curr.distance(end));
 
       for (String wayId : curr.getWayIDs()) {
         Way w = db.wayOfId(wayId);
         Node next = db.nodeOfId(w.getEndId()); // TODO check directed graphs
 
         if (!closed.containsKey(next)) {
-          distances.put(next, distances.get(curr) + curr.getDistance(end));
+          distances.put(next, distances.get(curr) + curr.distance(end));
           open.add(next);
           parents.put(next, w); // make sure this whole parents thing works
         }

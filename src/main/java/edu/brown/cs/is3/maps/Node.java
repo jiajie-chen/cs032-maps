@@ -4,18 +4,18 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
-import com.javadocmd.simplelatlng.LatLng;
-import com.javadocmd.simplelatlng.LatLngTool;
-import com.javadocmd.simplelatlng.util.LengthUnit;
+
+import edu.brown.cs.jc124.kdtree.Coordinate;
+import edu.brown.cs.jc124.kdtree.DimensionMismatchException;
 
 /**
  * Class representing a node object in the database;
  * @author is3
  *
  */
-public class Node {
+public class Node implements Coordinate {
   private final String id;
-  private final LatLng pos;
+  private final RadianLatLng pos;
   private Set<String> wayIDs = new HashSet<>(); // maybe use actual objects
 
   /**
@@ -23,7 +23,7 @@ public class Node {
    * @param id of node;
    * @param pos of node;
    */
-  public Node(String id, LatLng pos) {
+  public Node(String id, RadianLatLng pos) {
     this.id = id;
     this.pos = pos;
   }
@@ -36,17 +36,7 @@ public class Node {
    */
   public Node(String id, double lat, double lng) {
     this.id = id;
-    this.pos = new LatLng(lat, lng);
-  }
-
-  /**
-   * Finds the distance along the surface of the globe from this node to another
-   * node.
-   * @param end other node to move towards.
-   * @return distance along the globe between this and end.
-   */
-  public double getDistance(Node end) {
-    return LatLngTool.distance(this.pos, end.pos, LengthUnit.MILE);
+    this.pos = new RadianLatLng(lat, lng);
   }
 
   /**
@@ -59,7 +49,7 @@ public class Node {
   /**
    * @return the pos of the node.
    */
-  public LatLng getPos() {
+  public RadianLatLng getPos() {
     return this.pos;
   }
 
@@ -102,6 +92,38 @@ public class Node {
   @Override
   public int hashCode() {
     return id.hashCode();
+  }
+
+  //============== Coordinate Method Overrides ============
+  
+  @Override
+  public int getDimensions() {
+    return pos.getDimensions();
+  }
+
+  @Override
+  public double getField(int axis) {
+    return pos.getField(axis);
+  }
+  
+  /**
+   * Finds the distance along the surface of the globe from this node to another
+   * node.
+   * @param end other node to move towards.
+   * @return distance along the globe between this and end.
+   */
+  @Override
+  public double distance(Coordinate end) {
+    if (end instanceof RadianLatLng) {
+      return this.pos.distance( ((Node)end).pos );
+    } else {
+      throw new DimensionMismatchException("this Node can only get distance to another Node");
+    }
+  }
+
+  @Override
+  public double squaredDistance(Coordinate c) {
+    return Math.pow(distance(c), 2);
   }
 
 }
