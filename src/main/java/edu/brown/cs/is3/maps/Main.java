@@ -109,24 +109,11 @@ public class Main implements Runnable {
     OptionSpec<String> dbSpec = parser.nonOptions().ofType(String.class);
 
     OptionSet options;
-
-    try {
-      options = parser.parse(args);
-    } catch (OptionException e) {
-      printUsage();
-      return;
-    }
-
-    try {
-      sparkPort = (int) options.valueOf("port");
-    } catch (OptionException e) {
-      printUsage();
-      return;
-    }
-
     String dbPath;
 
     try {
+      options = parser.parse(args);
+      sparkPort = (int) options.valueOf("port");
       dbPath = options.valueOf(dbSpec);
     } catch (OptionException e) {
       printUsage();
@@ -140,8 +127,8 @@ public class Main implements Runnable {
 
     try {
       db = new Database(dbPath);
-    } catch (ClassNotFoundException | SQLException e1) {
-      System.err.println("ERROR: " + e1.getMessage());
+    } catch (ClassNotFoundException | SQLException e) {
+      System.err.println("ERROR: " + e.getMessage());
       return;
     }
 
@@ -171,7 +158,7 @@ public class Main implements Runnable {
       OptionSpec<String> argsSpec = parser.nonOptions().ofType(String.class);
       OptionSet options;
 
-      try {
+      try { // maybe needs checks for "" or regexes somewhere!!!!!!!
         options = parser.parse(s.split("[ ]+(?=([^\"]*\"[^\"]*\")*[^\"]*$)"));
       } catch (OptionException e) {
         printREPLUsage();
@@ -194,39 +181,43 @@ public class Main implements Runnable {
         db.close();
         return;
       } else {
+        Node start = null;
+        Node end = null;
+
         if (containsDoubles(argsList)) {
-          com.javadocmd.simplelatlng.LatLng start = new LatLng(
+          LatLng startPos = new LatLng(
               Double.parseDouble(argsList.get(0)),
               Double.parseDouble(argsList.get(1)));
-          LatLng end = new LatLng(
+          LatLng endPos = new LatLng(
               Double.parseDouble(argsList.get(2)),
               Double.parseDouble(argsList.get(3)));
 
-          System.out.println("" + start + end); // ////////////
+          // start = kd.nearestNeighbors(startPos, 1);
+          // end = kd.nearestNeighbors(endPos, 1);
           // TODO
-        } else { // maybe needs checks for "" or regexes somewhere!!!!!!!
+        } else {
           String startStreet = argsList.get(0).replace("\"", "");
           String startCross = argsList.get(1).replace("\"", "");
           String endStreet = argsList.get(2).replace("\"", "");
           String endCross = argsList.get(3).replace("\"", "");
 
-          Node start = db.nodeOfIntersection(startStreet, startCross);
-          Node end = db.nodeOfIntersection(endStreet, endCross);
+          start = db.nodeOfIntersection(startStreet, startCross);
+          end = db.nodeOfIntersection(endStreet, endCross);
+        }
 
-          Graph g = new Graph(db);
-          List<Way> path = null;
+        Graph g = new Graph(db);
+        List<Way> path = null;
 
-          try {
-            path = g.dijkstras(start, end);
-          } catch (RuntimeException e) {
-            System.err.println("ERROR: " + e.getMessage());
-          }
+        try {
+          path = g.dijkstras(start, end);
+        } catch (RuntimeException e) {
+          System.err.println("ERROR: " + e.getMessage());
+        }
 
-          if (path == null) {
-            System.out.println(start.getId() + " -/- " + end.getId());
-          } else {
-            printPath(path);
-          }
+        if (path == null) {
+          System.out.println(start.getId() + " -/- " + end.getId());
+        } else {
+          printPath(path);
         }
       }
 

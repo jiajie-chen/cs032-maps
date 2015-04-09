@@ -257,9 +257,30 @@ public class Database {
     }
   }
 
+  /**
+   * Retrieves but does not cache all node objects from the database.
+   * @return the set of all unique node objects in the database.
+   */
   public Set<Node> allNodes() {
-    // TODO Auto-generated method stub
+    Set<Node> toReturn = new HashSet<>();
+    String nodeQuery = "SELECT DISTINCT id, latitude, longitude FROM way;";
 
-    return null;
+    try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery);
+        ResultSet nodeRS = nodePS.executeQuery()) {
+
+      while (nodeRS.next()) {
+        String id = nodeRS.getString(1);
+        double lat = Double.parseDouble(nodeRS.getString(2));
+        double lng = Double.parseDouble(nodeRS.getString(3));
+
+        Node toAdd = new Node(id, new LatLng(lat, lng));
+        toReturn.add(toAdd);
+      }
+    } catch (SQLException e) {
+      close();
+      throw new RuntimeException("Failed to generate full node list.");
+    }
+
+    return toReturn;
   }
 }
