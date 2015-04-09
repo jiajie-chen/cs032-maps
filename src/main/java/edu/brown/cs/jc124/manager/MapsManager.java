@@ -6,6 +6,7 @@ import edu.brown.cs.is3.maps.Database;
 /**
  * @author jchen
  *
+ * Manages maps and queries over maps (including autocompletion and closest-point)
  */
 public class MapsManager {
   private Database db;
@@ -24,5 +25,7 @@ public class MapsManager {
     
     mapsKd.fill(db);
   }
+  
+  public get
 
 }
