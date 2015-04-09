@@ -256,4 +256,10 @@ public class Database {
       throw new RuntimeException(e);
     }
   }
+
+  public Set<Node> allNodes() {
+    // TODO Auto-generated method stub
+
+    return null;
+  }
 }

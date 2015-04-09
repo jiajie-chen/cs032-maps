@@ -16,25 +16,21 @@
 
     <div id="searchDiv">
 
-    <form method="POST" action="/suggestion" class="searchForm">
-      <textarea id="startbox" class="searchbar" rows="1" cols="40" placeholder="Start"></textarea></br>
+      <input type="text" class="searchBar" name="start" id="start" list="startList" placeholder="Starting Street">
+      <datalist class="suggestionList" id="startList">
+      </datalist>
 
-      <textarea id="suggestion1" class="sbox" rows="1" cols="40" readonly></textarea></br>
-      <textarea id="suggestion2" class="sbox" rows="1" cols="40" readonly></textarea></br>
-      <textarea id="suggestion3" class="sbox" rows="1" cols="40" readonly></textarea></br>
-      <textarea id="suggestion4" class="sbox" rows="1" cols="40" readonly></textarea></br>
-      <textarea id="suggestion5" class="sbox" rows="1" cols="40" readonly></textarea></br>
-    </form> 
+      <input type="text" class="searchBar" name="sCross" id="sCross" list="sCrossList" placeholder="Starting Cross Street">
+      <datalist class="suggestionList" id="sCrossList">
+      </datalist>
 
-    <form method="POST" action="/suggestion" class="searchForm">
-      <textarea id="endbox" class="searchbar" rows="1" cols="40" placeholder="End"></textarea></br>
+      <input type="text" class="searchBar" name="end" id="end" list="endList" placeholder="Ending Street">
+      <datalist class="suggestionList" id="endList">
+      </datalist>
 
-      <textarea id="suggestion1" class="ebox" rows="1" cols="40" readonly></textarea></br>
-      <textarea id="suggestion2" class="ebox" rows="1" cols="40" readonly></textarea></br>
-      <textarea id="suggestion3" class="ebox" rows="1" cols="40" readonly></textarea></br>
-      <textarea id="suggestion4" class="ebox" rows="1" cols="40" readonly></textarea></br>
-      <textarea id="suggestion5" class="ebox" rows="1" cols="40" readonly></textarea></br>
-    </form> 
+      <input type="text" class="searchBar" name="eCross" id="eCross" list="eCrossList" placeholder="Ending Cross Street">
+      <datalist class="suggestionList" id="eCrossList">
+      </datalist>
 
   </div>
 

@@ -16,14 +16,20 @@
 
     <div id="searchDiv">
 
-      <input type="text" class="searchBar" name="start" id="start" list="startList" placeholder="Start">
-      <datalist id="startList">
-        <option value = "hiiii start">
+      <input type="text" class="searchBar" name="start" id="start" list="startList" placeholder="Starting Street">
+      <datalist class="suggestionList" id="startList">
       </datalist>
 
-      <input type="text" class="searchBar" name="end" id="end" list="endList" placeholder="End">
-      <datalist id="endList">
-        <option value = "hiiii end">
+      <input type="text" class="searchBar" name="sCross" id="sCross" list="sCrossList" placeholder="Starting Cross Street">
+      <datalist class="suggestionList" id="sCrossList">
+      </datalist>
+
+      <input type="text" class="searchBar" name="end" id="end" list="endList" placeholder="Ending Street">
+      <datalist class="suggestionList" id="endList">
+      </datalist>
+
+      <input type="text" class="searchBar" name="eCross" id="eCross" list="eCrossList" placeholder="Ending Cross Street">
+      <datalist class="suggestionList" id="eCrossList">
       </datalist>
 
   </div>

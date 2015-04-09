@@ -15,10 +15,30 @@ h1 {
   padding: 10px;
 }
 
+#searchDiv {
+  height: 15%;
+  width: 100%;
+  position: relative;
+}
+#mainDiv {
+  height: 85%;
+  width: 100%;
+  position: relative;
+  border:2px solid #000000; /*will probably look cooler delete*/
+}
+
+#mainCanvas {
+    /*position:absolute;*/
+    width: 100%;
+    height: auto;
+}
+
 input.searchBar {
-	margin: 1em;
+	margin-bottom: 1em;
+  margin-right: 1em;
+  margin-left: 1em;
 	padding: .5em;
-  width: 30%;
+  width: 20%;
 	-webkit-border-radius: 15px;
   -moz-border-radius: 15px;
   border-radius: 15px;
@@ -35,61 +55,47 @@ input.searchBar {
   user-select: none;
   border: 1px solid #222222;
   font: 12pt 'Merienda One';
+  vertical-align: middle;
+}
+
+datalist.suggestionList {
+  margin: 1em;
 }
 
 input:focus {
 	outline: none;
 }
 
-#end::-webkit-input-placeholder {
-    color: red;
-}
-#end:-moz-placeholder {
-    /* FF 4-18 */
-    color: red;
-}
-#end::-moz-placeholder {
-    /* FF 19+ */
-    color: red;
-}
-#end:-ms-input-placeholder {
-    /* IE 10+ */
-    color: red;
-}
-
-#start::-webkit-input-placeholder {
+#start::-webkit-input-placeholder, #sCross::-webkit-input-placeholder {
     color: green;
 }
-#start:-moz-placeholder {
+#start:-moz-placeholder, #sCross:-moz-placeholder {
     /* FF 4-18 */
     color: green;
 }
-#start::-moz-placeholder {
+#start::-moz-placeholder, #sCross::-moz-placeholder, {
     /* FF 19+ */
     color: green;
 }
-#start:-ms-input-placeholder {
+#start:-ms-input-placeholder, #sCross:-ms-input-placeholder {
     /* IE 10+ */
     color: green;
 }
 
-#searchDiv {
-  display: inline-block;
-  height: 10%;
-  width: 100%;
-  position: relative;
+#end::-webkit-input-placeholder, #eCross::-webkit-input-placeholder {
+    color: red;
 }
-#mainDiv {
-  height: 90%;
-  width: 100%;
-  position: relative;
-  border:2px solid #000000; /*will probably look cooler delete*/
+#end:-moz-placeholder, #eCross:-moz-placeholder {
+    /* FF 4-18 */
+    color: red;
 }
-
-#mainCanvas {
-    /*position:absolute;*/
-    width: 100%;
-    height: auto;
+#end::-moz-placeholder, #eCross::-moz-placeholder, {
+    /* FF 19+ */
+    color: red;
+}
+#end:-ms-input-placeholder, #eCross:-ms-input-placeholder {
+    /* IE 10+ */
+    color: red;
 }
 
 /*textarea.sbox {

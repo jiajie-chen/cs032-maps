@@ -13,6 +13,4 @@ public class KdTreeManager {
   public void fill(Database db) {
     db.allNodes();
   }
-  
-  public 
 }
