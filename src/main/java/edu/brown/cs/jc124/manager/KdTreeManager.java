@@ -1,5 +1,18 @@
 package edu.brown.cs.jc124.manager;
 
-public class KdTreeManager {
+import edu.brown.cs.is3.maps.Database;
 
+/**
+ * @author jchen
+ *
+ */
+public class KdTreeManager {
+  /**
+   * @param db
+   */
+  public void fill(Database db) {
+    db.allNodes();
+  }
+  
+  public 
 }

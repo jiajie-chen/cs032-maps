@@ -11,12 +11,33 @@ import edu.brown.cs.is3.ranker.DefaultRanker;
 import edu.brown.cs.is3.ranker.Ranker;
 import edu.brown.cs.is3.trie.Trie;
 
+/**
+ * Manages autocorrection suggestion queries.
+ *
+ * @author is3
+ */
 public class SuggestionHelper {
-  private Trie dict = new Trie();
-  private Map<String, Integer> unifreqs = new HashMap<>();
-  private Map<String, Integer> bifreqs = new HashMap<>();
   private static final int MAX_SUGGESTIONS = 5;
+  
+  private Trie dict;
+  private Map<String, Integer> unifreqs;
+  private Map<String, Integer> bifreqs;
+  
+  
+  /**
+   * Makes a suggestion helper with no data loaded.
+   */
+  public SuggestionHelper() {
+    dict = new Trie();
+    unifreqs = new HashMap<>();
+    bifreqs = new HashMap<>();
+  }
 
+  /**
+   * Loads way names from the database.
+   *
+   * @param db the database to load ways from.
+   */
   public void fill(Database db) {
     for (String name : db.allWayNames()) {
       dict.insert(name);
@@ -25,6 +46,12 @@ public class SuggestionHelper {
     }
   }
 
+  /**
+   * Given a list of words, returns the auto correction suggestions
+   *
+   * @param words
+   * @return
+   */
   public List<String> suggest(String[] words) {
     if (words.length == 0) {
       return new ArrayList<>();
