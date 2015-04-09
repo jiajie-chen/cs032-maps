@@ -9,6 +9,7 @@ import java.util.List;
 import com.javadocmd.simplelatlng.LatLng;
 
 import edu.brown.cs.is3.autocorrect.SuggestionHelper;
+import edu.brown.cs.is3.graph.Graph;
 
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
@@ -52,7 +53,7 @@ public class Main implements Runnable {
    * Prints program usage for CLI.
    */
   private static void printUsage() {
-    System.err.println("Error: Usage: ./run [--gui] [--port <int>] <db>");
+    System.err.println("ERROR: Usage: ./run [--gui] [--port <int>] <db>");
   }
 
   /**
@@ -60,7 +61,7 @@ public class Main implements Runnable {
    */
   private static void printREPLUsage() {
     System.err
-        .println("Error: Usage: "
+        .println("ERROR: Usage: "
             + "<lat1> <lon1> <lat2> <lon2> OR "
             + "<\"Street 1\"> <\"Cross Street 1\"> <\"Street 2\"> <\"Cross Street 2\">");
   }
@@ -140,7 +141,7 @@ public class Main implements Runnable {
     try {
       db = new Database(dbPath);
     } catch (ClassNotFoundException | SQLException e1) {
-      System.err.println("Error: " + e1.getMessage());
+      System.err.println("ERROR: " + e1.getMessage());
       return;
     }
 
@@ -149,8 +150,8 @@ public class Main implements Runnable {
     } else {
       try {
         processQueries();
-      } catch (IOException e) {
-        System.err.println("Error: " + e.getMessage());
+      } catch (IOException | RuntimeException e) {
+        System.err.println("ERROR: " + e.getMessage());
         db.close();
         return;
       }
@@ -171,7 +172,7 @@ public class Main implements Runnable {
       OptionSet options;
 
       try {
-        options = parser.parse(s.split("\\s+"));
+        options = parser.parse(s.split("[ ]+(?=([^\"]*\"[^\"]*\")*[^\"]*$)"));
       } catch (OptionException e) {
         printREPLUsage();
         db.close();
@@ -183,13 +184,10 @@ public class Main implements Runnable {
       try {
         argsList = options.valuesOf(argsSpec);
       } catch (OptionException e) {
-        System.out
-            .println(" FAILED HEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");//
         printREPLUsage();
         db.close();
         return;
       }
-      System.out.println("GOT: " + argsList); // ///////////////////////
 
       if (argsList.size() != EXPECTED_ARGS) {
         printREPLUsage();
@@ -207,12 +205,23 @@ public class Main implements Runnable {
           System.out.println("" + start + end); // ////////////
           // TODO
         } else { // maybe needs checks for "" or regexes somewhere!!!!!!!
-          String startStreet = argsList.get(0);
-          String startCross = argsList.get(1);
-          String endStreet = argsList.get(2);
-          String endCross = argsList.get(3);
-          // TODO
-          System.out.println(argsList); // //////////////
+          String startStreet = argsList.get(0).replace("\"", "");
+          String startCross = argsList.get(1).replace("\"", "");
+          String endStreet = argsList.get(2).replace("\"", "");
+          String endCross = argsList.get(3).replace("\"", "");
+
+          Node start = db.nodeOfIntersection(startStreet, startCross);
+          Node end = db.nodeOfIntersection(endStreet, endCross);
+
+          Graph g = new Graph(db);
+          System.out.println("START: " + start); // ///////////////////////////
+          System.out.println("END: " + end); // ///////////////////////////////
+          List<Way> path = g.dijkstras(start, end);
+          if (path == null) {
+            System.out.println(start.getId() + " -/- " + end.getId());
+          }
+
+          printPath(path);
         }
       }
 
@@ -223,11 +232,20 @@ public class Main implements Runnable {
     return;
   }
 
+  private void printPath(List<Way> path) {
+    for (Way w : path) {
+      System.out.println(w);
+    }
+
+    return;
+  }
+
   /**
    * Luanches a spark server to allow for GUI querying of maps.
    */
   private void runSparkServer() {
     SuggestionHelper sh = new SuggestionHelper();
+
     try {
       sh.fill(db);
     } catch (RuntimeException e) {

@@ -33,7 +33,7 @@ public class Database {
   public Database(String path) throws ClassNotFoundException, SQLException {
     File f = new File(path);
     if (!f.exists() || !f.isFile()) {
-      throw new SQLException("Invalid database file: " + path);
+      throw new SQLException("Invalid database file: " + path + ".");
     }
 
     Class.forName("org.sqlite.JDBC");
@@ -90,7 +90,7 @@ public class Database {
 
     Node toReturn;
 
-    String nodeQuery = "SELECT latitude, longitude FROM node WHERE id = ? LIMIT 1";
+    String nodeQuery = "SELECT latitude, longitude FROM node WHERE id = ? LIMIT 1;";
     String wayQuery = "SELECT id, name, end FROM way WHERE start = ?;";
 
     try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery);
@@ -143,7 +143,7 @@ public class Database {
       return wayById.get(id);
     }
 
-    String wayQuery = "SELECT name, start, end FROM way WHERE id = ? LIMIT 1";
+    String wayQuery = "SELECT name, start, end FROM way WHERE id = ? LIMIT 1;";
 
     try (PreparedStatement wayPS = conn.prepareStatement(wayQuery)) {
       wayPS.setString(1, id);
@@ -178,7 +178,7 @@ public class Database {
    * @return the way with that name.
    */
   public Way wayOfName(String name) {
-    String wayQuery = "SELECT id, start, end FROM way WHERE name = ? LIMIT 1";
+    String wayQuery = "SELECT id, start, end FROM way WHERE name = ? LIMIT 1;";
 
     try (PreparedStatement wayPS = conn.prepareStatement(wayQuery)) {
       wayPS.setString(1, name);

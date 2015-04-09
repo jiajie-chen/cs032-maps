@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
+import edu.brown.cs.is3.cartesian.DistanceToComparator;
 import edu.brown.cs.is3.maps.Database;
 import edu.brown.cs.is3.maps.Node;
 import edu.brown.cs.is3.maps.Way;
@@ -36,8 +37,9 @@ public class Graph {
    * @return list of the shortest set of ways to travel between start and end.
    */
   public List<Way> dijkstras(Node start, Node end) {
-    PriorityQueue<Node> open = new PriorityQueue<>(); // the open list (by f)
     Map<Node, Double> distances = new HashMap<>(); // the distances list (g)
+    PriorityQueue<Node> open = new PriorityQueue<>(
+        new DistanceToComparator(end, distances)); // the open list (by f)
     Map<Node, Double> closed = new HashMap<>(); // the explored distances list
     Map<Node, Way> parents = new HashMap<>(); // (node, parent) // MAYBE WAY?
 
@@ -47,6 +49,7 @@ public class Graph {
 
     while (!open.isEmpty()) {
       Node curr = open.poll();
+      System.out.println("Currently at: " + curr);
 
       if (curr.equals(end)) {
         return generateSolution(curr, parents);
@@ -66,7 +69,7 @@ public class Graph {
       }
     }
 
-    return new ArrayList<>();
+    return null;
   }
 
   /**
@@ -81,7 +84,7 @@ public class Graph {
 
     while (toAdd != null) {
       toReturn.add(0, toAdd);
-      toAdd = parents.get(curr);
+      toAdd = parents.get(db.nodeOfId(toAdd.getStartId()));
     }
 
     return toReturn;

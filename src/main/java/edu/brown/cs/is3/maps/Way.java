@@ -57,8 +57,7 @@ public class Way {
 
   @Override
   public String toString() {
-    return "Node: " + id + " Name: " + name + " Start: " + startId
-        + " End: " + endId;
+    return "" + startId + " -> " + endId + " : " + this.id;
   }
 
   @Override
