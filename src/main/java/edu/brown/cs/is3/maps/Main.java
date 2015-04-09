@@ -214,14 +214,19 @@ public class Main implements Runnable {
           Node end = db.nodeOfIntersection(endStreet, endCross);
 
           Graph g = new Graph(db);
-          System.out.println("START: " + start); // ///////////////////////////
-          System.out.println("END: " + end); // ///////////////////////////////
-          List<Way> path = g.dijkstras(start, end);
-          if (path == null) {
-            System.out.println(start.getId() + " -/- " + end.getId());
+          List<Way> path = null;
+
+          try {
+            path = g.dijkstras(start, end);
+          } catch (RuntimeException e) {
+            System.err.println("ERROR: " + e.getMessage());
           }
 
-          printPath(path);
+          if (path == null) {
+            System.out.println(start.getId() + " -/- " + end.getId());
+          } else {
+            printPath(path);
+          }
         }
       }
 
@@ -232,6 +237,10 @@ public class Main implements Runnable {
     return;
   }
 
+  /**
+   * Prints a path to standard out. Only takes non-null paths.
+   * @param path set of ways to print.
+   */
   private void printPath(List<Way> path) {
     for (Way w : path) {
       System.out.println(w);

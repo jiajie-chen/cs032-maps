@@ -20,6 +20,10 @@ import edu.brown.cs.is3.maps.Way;
 public class Graph {
   private Database db;
 
+  /**
+   * Constructs a graph out of a database to hold nodes and ways.
+   * @param db
+   */
   public Graph(Database db) {
     this.db = db;
   }
@@ -34,9 +38,14 @@ public class Graph {
    * Uses a heuristic based on Euclidean distance.
    * @param start node to start at.
    * @param end node to end at.
-   * @return list of the shortest set of ways to travel between start and end.
+   * @return list of the shortest set of ways to travel between start and end or
+   *         null if no path exists.
    */
   public List<Way> dijkstras(Node start, Node end) {
+    if (start.equals(end)) {
+      throw new RuntimeException("Those are the same node, silly!");
+    }
+
     Map<Node, Double> distances = new HashMap<>(); // the distances list (g)
     PriorityQueue<Node> open = new PriorityQueue<>(
         new DistanceToComparator(end, distances)); // the open list (by f)
