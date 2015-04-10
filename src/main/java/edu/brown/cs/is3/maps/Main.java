@@ -16,6 +16,8 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
+// SHOULD BE TESTING PARSING SOMEWHERE AND MAYBE FACTOR STUFF FROM MAIN
+
 /**
  * Main class implementing maps, including shortest path searches, auto
  * correction, and nearest neighbor searches based on both the command line and

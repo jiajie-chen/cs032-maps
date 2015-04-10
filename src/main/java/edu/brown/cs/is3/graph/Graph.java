@@ -18,7 +18,7 @@ import edu.brown.cs.is3.maps.Way;
  *
  */
 public class Graph {
-  private Database db;
+  private final Database db;
 
   /**
    * Constructs a graph out of a database to hold nodes and ways.
