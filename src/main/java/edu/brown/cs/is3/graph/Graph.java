@@ -58,7 +58,6 @@ public class Graph {
 
     while (!open.isEmpty()) {
       Node curr = open.poll();
-      System.out.println("Currently at: " + curr);
 
       if (curr.equals(end)) {
         return generateSolution(curr, parents);
