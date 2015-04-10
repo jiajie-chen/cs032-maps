@@ -16,6 +16,8 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
 // SHOULD BE TESTING PARSING SOMEWHERE AND MAYBE FACTOR STUFF FROM MAIN
+// TURNS OUT THE DATA ENTRY IN MAPS.SQLITE3 IS THE BIGGEST NIGHTMARE EVER
+// AND ONLY SORT OF GETS YOU THE KIND OF THINGS YOU WOULD WANT
 
 /**
  * Main class implementing maps, including shortest path searches, auto

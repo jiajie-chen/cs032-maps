@@ -39,8 +39,7 @@ public class Graph {
    * Uses a heuristic based on Euclidean distance.
    * @param start node to start at.
    * @param end node to end at.
-   * @return list of the shortest set of ways to travel between start and end or
-   *         null if no path exists.
+   * @return path with the shortest set of ways or null list if no path exists.
    */
   public Path dijkstras(Node start, Node end) {
     if (start.equals(end)) {
