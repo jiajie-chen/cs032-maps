@@ -1,11 +1,13 @@
  $(document).ready(function() {
     var sb = document.getElementById("start");
     var eb = document.getElementById("end");
+    var scb = document.getElementById("sCross");
+    var ecb = document.getElementById("eCross");
 
     console.log("Script started!");
 
     sb.addEventListener("keyup", function(event) {
-      var text = document.getElementById("start").value;
+      var text = sb.value;
 
       var postParameters = {inputStart: JSON.stringify(text)};
       console.log(postParameters);
@@ -15,12 +17,12 @@
         responseObject = JSON.parse(responseJSON);
         var suggestionsList = responseObject.startSuggestions;
 
-        displayStart(suggestionsList);
+        displaySuggestions(suggestionsList, "startList");
       });
     });
 
     eb.addEventListener("keyup", function(event) {
-      var text = document.getElementById("end").value;
+      var text = eb.value;
 
       var postParameters = {inputEnd: JSON.stringify(text)};
       console.log(postParameters);
@@ -30,40 +32,53 @@
         responseObject = JSON.parse(responseJSON);
         var suggestionsList = responseObject.endSuggestions;
 
-        displayEnd(suggestionsList);
+        displaySuggestions(suggestionsList, "endList");
       });
     });
 
-  function displayStart(suggestionsList) {
-    // var hide = $("#hide").is(":checked");
-    if (suggestionsList == null || suggestionsList.length == 0) {
-      document.getElementById('startList').innerHTML = "";
+    scb.addEventListener("keyup", function(event) {
+      var text = scb.value;
+
+      var postParameters = {inputStart: JSON.stringify(text)};
+      console.log(postParameters);
+
+      $.post("/suggestions", postParameters, function(responseJSON) {
+        console.log("Received suggestions: " + responseJSON);
+        responseObject = JSON.parse(responseJSON);
+        var suggestionsList = responseObject.startSuggestions;
+
+        displaySuggestions(suggestionsList, "sCrossList");
+      });
+    });
+
+    ecb.addEventListener("keyup", function(event) {
+      var text = ecb.value;
+
+      var postParameters = {inputStart: JSON.stringify(text)};
+      console.log(postParameters);
+
+      $.post("/suggestions", postParameters, function(responseJSON) {
+        console.log("Received suggestions: " + responseJSON);
+        responseObject = JSON.parse(responseJSON);
+        var suggestionsList = responseObject.startSuggestions;
+
+        displaySuggestions(suggestionsList, "eCrossList");
+      });
+    });
+
+    function displaySuggestions(suggestionsList, listID) {
+      document.getElementById(listID).innerHTML = "";
+
+      if (suggestionsList == null || suggestionsList.length == 0) {
+        return;
+      }
+
+      for (var i = 0; i < suggestionsList.length; i++) {
+        var option = new Option("", suggestionsList[i]);
+        document.getElementById(listID).appendChild(option);
+      }
+
       return;
     }
-
-    var options = "";
-
-    for (var i = 0; i < suggestionsList.length; i++) {
-      options += '<option value="' + suggestionsList[i] + '" />';
-    }
-
-    document.getElementById('startList').innerHTML = options;
-  }
-
-  function displayEnd(suggestionsList) {
-    // var hide = $("#hide").is(":checked");
-    if (suggestionsList == null || suggestionsList.length == 0) {
-      document.getElementById('endList').innerHTML = "";
-      return;
-    }
-
-    var options = "";
-
-    for (var i = 0; i < suggestionsList.length; i++) {
-      options += '<option value="' + suggestionsList[i] + '" />';
-    }
-
-    document.getElementById('endList').innerHTML = options;
-  }
 
 });

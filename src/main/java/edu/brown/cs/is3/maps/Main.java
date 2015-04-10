@@ -14,6 +14,8 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
+// SHOULD BE TESTING PARSING SOMEWHERE AND MAYBE FACTOR STUFF FROM MAIN
+
 /**
  * Main class implementing maps, including shortest path searches, auto
  * correction, and nearest neighbor searches based on both the command line and
@@ -108,24 +110,11 @@ public class Main implements Runnable {
     OptionSpec<String> dbSpec = parser.nonOptions().ofType(String.class);
 
     OptionSet options;
-
-    try {
-      options = parser.parse(args);
-    } catch (OptionException e) {
-      printUsage();
-      return;
-    }
-
-    try {
-      sparkPort = (int) options.valueOf("port");
-    } catch (OptionException e) {
-      printUsage();
-      return;
-    }
-
     String dbPath;
 
     try {
+      options = parser.parse(args);
+      sparkPort = (int) options.valueOf("port");
       dbPath = options.valueOf(dbSpec);
     } catch (OptionException e) {
       printUsage();
@@ -139,8 +128,8 @@ public class Main implements Runnable {
 
     try {
       db = new Database(dbPath);
-    } catch (ClassNotFoundException | SQLException e1) {
-      System.err.println("ERROR: " + e1.getMessage());
+    } catch (ClassNotFoundException | SQLException e) {
+      System.err.println("ERROR: " + e.getMessage());
       return;
     }
     
@@ -177,7 +166,7 @@ public class Main implements Runnable {
       OptionSpec<String> argsSpec = parser.nonOptions().ofType(String.class);
       OptionSet options;
 
-      try {
+      try { // maybe needs checks for "" or regexes somewhere!!!!!!!
         options = parser.parse(s.split("[ ]+(?=([^\"]*\"[^\"]*\")*[^\"]*$)"));
       } catch (OptionException e) {
         printREPLUsage();

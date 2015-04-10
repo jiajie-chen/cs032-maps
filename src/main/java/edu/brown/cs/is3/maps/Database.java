@@ -30,7 +30,7 @@ public class Database {
    */
   public Database(String path) throws ClassNotFoundException, SQLException {
     File f = new File(path);
-    if (!f.exists() || !f.isFile()) {
+    if (!f.exists() || !f.isFile() || !path.endsWith(".sqlite3")) {
       throw new SQLException("Invalid database file: " + path + ".");
     }
 
@@ -160,42 +160,7 @@ public class Database {
 
         Way toReturn = new Way(id, name, startID, endID);
         wayById.put(id, toReturn);
-        return toReturn; // maybe should build nodes!!
-      }
-    } catch (SQLException e) {
-      close();
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Searches for and returns the way with the given name;
-   * @param name to search for.
-   * @return the way with that name.
-   */
-  public Way wayOfName(String name) {
-    String wayQuery = "SELECT id, start, end FROM way WHERE name = ? LIMIT 1;";
-
-    try (PreparedStatement wayPS = conn.prepareStatement(wayQuery)) {
-      wayPS.setString(1, name);
-
-      try (ResultSet wayRS = wayPS.executeQuery()) {
-        String id;
-        String startID;
-        String endID;
-
-        if (wayRS.next()) {
-          id = wayRS.getString(1);
-          startID = wayRS.getString(2);
-          endID = wayRS.getString(3);
-        } else {
-          close();
-          throw new RuntimeException("No way with that name.");
-        }
-
-        Way toReturn = new Way(id, name, startID, endID);
-        wayById.put(id, toReturn);
-        return toReturn; // maybe should build nodes!!
+        return toReturn;
       }
     } catch (SQLException e) {
       close();
@@ -256,11 +221,12 @@ public class Database {
   }
 
   /**
-   * @return
+   * Retrieves but does not cache all node objects from the database.
+   * @return the set of all unique node objects in the database.
    */
   public Set<KdMapNode> allKdMapNodes() {
     Set<KdMapNode> toReturn = new HashSet<>();
-    String nodeQuery = "SELECT node.id, node.latitude, node.longitude FROM node;";
+    String nodeQuery = "SELECT id, latitude, longitude FROM node;";
 
     try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery)) {
       try (ResultSet nodeRS = nodePS.executeQuery()) {
@@ -274,11 +240,12 @@ public class Database {
           toReturn.add(n);
         }
         
-        return toReturn;
       }
     } catch (SQLException e) {
       close();
       throw new RuntimeException(e);
     }
+    
+    return toReturn;
   }
 }

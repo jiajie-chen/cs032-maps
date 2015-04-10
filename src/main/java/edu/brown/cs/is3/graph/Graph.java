@@ -18,7 +18,7 @@ import edu.brown.cs.is3.maps.Way;
  *
  */
 public class Graph {
-  private Database db;
+  private final Database db;
   private Node start;
 
   /**
@@ -61,7 +61,6 @@ public class Graph {
 
     while (!open.isEmpty()) {
       Node curr = open.poll();
-      System.out.println("Currently at: " + curr);
 
       if (curr.equals(end)) {
         return generateSolution(curr, parents);
