@@ -5,6 +5,7 @@ import java.util.List;
 import edu.brown.cs.is3.autocorrect.SuggestionHelper;
 import edu.brown.cs.is3.graph.Graph;
 import edu.brown.cs.is3.maps.Database;
+import edu.brown.cs.is3.maps.KdMapNode;
 import edu.brown.cs.is3.maps.Node;
 import edu.brown.cs.is3.maps.Way;
 
@@ -39,13 +40,12 @@ public class MapsManager {
     return path;
   }
   
-  /**
-   * @param closest
-   * @return
-   */
-  public List<Way> getPathByPoints(Node closestStart, Node closestEnd) {
-    Node start = mapsKd.getPointClosest(closestStart);
-    Node end = mapsKd.getPointClosest(closestEnd);
+  public List<Way> getPathByPoints(Double lat1, Double lng1, Double lat2, Double lng2) {
+    KdMapNode closestStart = mapsKd.getPointClosest(lat1, lng1);
+    KdMapNode closestEnd = mapsKd.getPointClosest(lat2, lng2);
+    
+    Node start = db.nodeOfId(closestStart.getId());
+    Node end = db.nodeOfId(closestEnd.getId());
     
     return getShortestPath(start, end);
   }

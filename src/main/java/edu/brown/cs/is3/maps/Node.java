@@ -5,15 +5,12 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 
-import edu.brown.cs.jc124.kdtree.Coordinate;
-import edu.brown.cs.jc124.kdtree.DimensionMismatchException;
-
 /**
  * Class representing a node object in the database;
  * @author is3
  *
  */
-public class Node implements Coordinate {
+public class Node {
   private final String id;
   private final RadianLatLng pos;
   private Set<String> wayIDs = new HashSet<>(); // maybe use actual objects
@@ -52,6 +49,17 @@ public class Node implements Coordinate {
   public RadianLatLng getPos() {
     return this.pos;
   }
+  
+
+  /**
+   * Finds the distance along the surface of the globe from this node to another
+   * node.
+   * @param end other node to move towards.
+   * @return distance along the globe between this and end.
+   */
+  public double getDistance(Node end) {
+    return this.getPos().distance(end.getPos());
+  }
 
   /**
    * @return an immutable list of the ids of the way connected to this node.
@@ -86,44 +94,11 @@ public class Node implements Coordinate {
 
     Node n = (Node) o;
 
-    return this.id.equals(n.id);
+    return this.getId().equals(n.getId());
   }
 
   @Override
   public int hashCode() {
     return id.hashCode();
   }
-
-  //============== Coordinate Method Overrides ============
-  
-  @Override
-  public int getDimensions() {
-    return pos.getDimensions();
-  }
-
-  @Override
-  public double getField(int axis) {
-    return pos.getField(axis);
-  }
-  
-  /**
-   * Finds the distance along the surface of the globe from this node to another
-   * node.
-   * @param end other node to move towards.
-   * @return distance along the globe between this and end.
-   */
-  @Override
-  public double distance(Coordinate end) {
-    if (end instanceof RadianLatLng) {
-      return this.pos.distance( ((Node)end).pos );
-    } else {
-      throw new DimensionMismatchException("this Node can only get distance to another Node");
-    }
-  }
-
-  @Override
-  public double squaredDistance(Coordinate c) {
-    return Math.pow(distance(c), 2);
-  }
-
 }

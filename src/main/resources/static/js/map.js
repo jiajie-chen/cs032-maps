@@ -12,7 +12,7 @@ var initMap = function(id) {
 
 	// create clear rect for drag operations
 	r.rect(0, 0, cWi, cHi).drag(function (dx, dy) {
-
+		
 	});
 }
 

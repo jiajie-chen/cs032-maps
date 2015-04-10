@@ -255,8 +255,30 @@ public class Database {
     }
   }
 
-  public Set<Node> allNodes() {
-    // TODO Auto-generated method stub
-    return null;
+  /**
+   * @return
+   */
+  public Set<KdMapNode> allKdMapNodes() {
+    Set<KdMapNode> toReturn = new HashSet<>();
+    String nodeQuery = "SELECT node.id, node.latitude, node.longitude FROM node;";
+
+    try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery)) {
+      try (ResultSet nodeRS = nodePS.executeQuery()) {
+        
+        while (nodeRS.next()) {
+          String nodeId = nodeRS.getString(1);
+          Double lat = Double.parseDouble(nodeRS.getString(2));
+          Double lng = Double.parseDouble(nodeRS.getString(3));
+
+          KdMapNode n = new KdMapNode(nodeId, lat, lng);
+          toReturn.add(n);
+        }
+        
+        return toReturn;
+      }
+    } catch (SQLException e) {
+      close();
+      throw new RuntimeException(e);
+    }
   }
 }
