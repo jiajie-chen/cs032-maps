@@ -46,14 +46,14 @@ public class Graph {
     if (start.equals(end)) {
       throw new RuntimeException("Those are the same node, silly!");
     }
-    
+
     this.start = start;
 
     Map<Node, Double> distances = new HashMap<>(); // the distances list (g)
     PriorityQueue<Node> open = new PriorityQueue<>(
         new DistanceToComparator(end, distances)); // the open list (by f)
     Map<Node, Double> closed = new HashMap<>(); // the explored distances list
-    Map<Node, Way> parents = new HashMap<>(); // (node, parent) // MAYBE WAY?
+    Map<Node, Way> parents = new HashMap<>(); // (node, way to node)
 
     distances.put(start, 0.0);
     open.add(start);
@@ -80,7 +80,7 @@ public class Graph {
       }
     }
 
-    return new Path(start, end); //path with no ways
+    return new Path(start, end); // path with no ways
   }
 
   /**

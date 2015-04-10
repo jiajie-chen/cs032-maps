@@ -230,6 +230,8 @@ public class DatabaseTest {
         a.add(new KdMapNode(n.getId(), n.getPos().getLat(), n.getPos().getLng()));
       }
 
+      System.out.println(a);
+      System.out.println(all);
       assertTrue(a.equals(all));
     } catch (SQLException e) {
       fail(e.getMessage());
