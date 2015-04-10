@@ -10,7 +10,8 @@ import com.javadocmd.simplelatlng.LatLng;
 
 import edu.brown.cs.is3.autocorrect.SuggestionHelper;
 import edu.brown.cs.is3.graph.Graph;
-
+import edu.brown.cs.is3.graph.Path;
+import edu.brown.cs.jc124.manager.MapsManager;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -27,6 +28,7 @@ public class Main implements Runnable {
   private final String[] args;
   private int sparkPort;
   private Database db;
+  private MapsManager manager;
 
   private static final int DEFAULT_PORT = 3141;
   private static final int EXPECTED_ARGS = 4;
@@ -144,6 +146,13 @@ public class Main implements Runnable {
       System.err.println("ERROR: " + e1.getMessage());
       return;
     }
+    
+    try {
+      manager = new MapsManager(db);
+    } catch (RuntimeException e1) {
+      System.err.println("ERROR: " + e1.getMessage());
+      return;
+    }
 
     if (options.has("gui")) {
       runSparkServer();
@@ -194,58 +203,34 @@ public class Main implements Runnable {
         db.close();
         return;
       } else {
+        Path path = null;
+        
         if (containsDoubles(argsList)) {
-          com.javadocmd.simplelatlng.LatLng start = new LatLng(
-              Double.parseDouble(argsList.get(0)),
-              Double.parseDouble(argsList.get(1)));
-          LatLng end = new LatLng(
-              Double.parseDouble(argsList.get(2)),
-              Double.parseDouble(argsList.get(3)));
+          Double lat1 = Double.parseDouble(argsList.get(0));
+          Double lng1 = Double.parseDouble(argsList.get(1));
+          
+          Double lat2 = Double.parseDouble(argsList.get(2));
+          Double lng2 = Double.parseDouble(argsList.get(3));
 
-          System.out.println("" + start + end); // ////////////
-          // TODO
+          //System.out.println("" + start + end);
+          path = manager.getPathByPoints(lat1, lng1, lat2, lng2);
         } else { // maybe needs checks for "" or regexes somewhere!!!!!!!
           String startStreet = argsList.get(0).replace("\"", "");
           String startCross = argsList.get(1).replace("\"", "");
+          
           String endStreet = argsList.get(2).replace("\"", "");
           String endCross = argsList.get(3).replace("\"", "");
 
-          Node start = db.nodeOfIntersection(startStreet, startCross);
-          Node end = db.nodeOfIntersection(endStreet, endCross);
-
-          Graph g = new Graph(db);
-          List<Way> path = null;
-
-          try {
-            path = g.dijkstras(start, end);
-          } catch (RuntimeException e) {
-            System.err.println("ERROR: " + e.getMessage());
-          }
-
-          if (path == null) {
-            System.out.println(start.getId() + " -/- " + end.getId());
-          } else {
-            printPath(path);
-          }
+          path = manager.getPathByIntersections(startStreet, startCross, endStreet, endCross);
         }
+        
+        System.out.println(path);
       }
 
       s = r.readLine();
     }
 
     db.close();
-    return;
-  }
-
-  /**
-   * Prints a path to standard out. Only takes non-null paths.
-   * @param path set of ways to print.
-   */
-  private void printPath(List<Way> path) {
-    for (Way w : path) {
-      System.out.println(w);
-    }
-
     return;
   }
 

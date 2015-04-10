@@ -4,6 +4,7 @@ import java.util.List;
 
 import edu.brown.cs.is3.autocorrect.SuggestionHelper;
 import edu.brown.cs.is3.graph.Graph;
+import edu.brown.cs.is3.graph.Path;
 import edu.brown.cs.is3.maps.Database;
 import edu.brown.cs.is3.maps.KdMapNode;
 import edu.brown.cs.is3.maps.Node;
@@ -32,15 +33,14 @@ public class MapsManager {
     mapsKd.fill(db);
   }
   
-  private List<Way> getShortestPath(Node start, Node end) {
+  private Path getShortestPath(Node start, Node end) {
     Graph g = new Graph(db);
-    List<Way> path = null;
     
-    path = g.dijkstras(start, end);
+    Path path = g.dijkstras(start, end);
     return path;
   }
   
-  public List<Way> getPathByPoints(Double lat1, Double lng1, Double lat2, Double lng2) {
+  public Path getPathByPoints(Double lat1, Double lng1, Double lat2, Double lng2) {
     KdMapNode closestStart = mapsKd.getPointClosest(lat1, lng1);
     KdMapNode closestEnd = mapsKd.getPointClosest(lat2, lng2);
     
@@ -57,7 +57,7 @@ public class MapsManager {
    * @param endCross
    * @return
    */
-  public List<Way> getPathByIntersections(String startStreet, String startCross, String endStreet, String endCross) {
+  public Path getPathByIntersections(String startStreet, String startCross, String endStreet, String endCross) {
     Node start = db.nodeOfIntersection(startStreet, startCross);
     Node end = db.nodeOfIntersection(endStreet, endCross);
     

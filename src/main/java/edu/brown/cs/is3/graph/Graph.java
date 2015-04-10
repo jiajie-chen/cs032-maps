@@ -19,6 +19,7 @@ import edu.brown.cs.is3.maps.Way;
  */
 public class Graph {
   private Database db;
+  private Node start;
 
   /**
    * Constructs a graph out of a database to hold nodes and ways.
@@ -41,10 +42,12 @@ public class Graph {
    * @return list of the shortest set of ways to travel between start and end or
    *         null if no path exists.
    */
-  public List<Way> dijkstras(Node start, Node end) {
+  public Path dijkstras(Node start, Node end) {
     if (start.equals(end)) {
       throw new RuntimeException("Those are the same node, silly!");
     }
+    
+    this.start = start;
 
     Map<Node, Double> distances = new HashMap<>(); // the distances list (g)
     PriorityQueue<Node> open = new PriorityQueue<>(
@@ -78,7 +81,7 @@ public class Graph {
       }
     }
 
-    return null;
+    return new Path(start, end); //path with no ways
   }
 
   /**
@@ -87,7 +90,7 @@ public class Graph {
    * @param parents map of nodes to the ways leading to them.
    * @return a list of the ways along the shortest path to curr.
    */
-  private List<Way> generateSolution(Node curr, Map<Node, Way> parents) {
+  private Path generateSolution(Node curr, Map<Node, Way> parents) {
     List<Way> toReturn = new ArrayList<>();
     Way toAdd = parents.get(curr);
 
@@ -96,6 +99,6 @@ public class Graph {
       toAdd = parents.get(db.nodeOfId(toAdd.getStartId()));
     }
 
-    return toReturn;
+    return new Path(start, curr, toReturn);
   }
 }
