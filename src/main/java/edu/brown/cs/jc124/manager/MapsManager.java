@@ -1,19 +1,16 @@
 package edu.brown.cs.jc124.manager;
 
-import java.util.List;
-
 import edu.brown.cs.is3.autocorrect.SuggestionHelper;
 import edu.brown.cs.is3.graph.Graph;
 import edu.brown.cs.is3.graph.Path;
 import edu.brown.cs.is3.maps.Database;
 import edu.brown.cs.is3.maps.KdMapNode;
 import edu.brown.cs.is3.maps.Node;
-import edu.brown.cs.is3.maps.Way;
 
 /**
  * @author jchen
  *
- * Manages maps and queries over maps (including autocompletion and closest-point)
+ * Manages maps and queries over maps (including auto-completion and closest-point)
  */
 public class MapsManager {
   private Database db;

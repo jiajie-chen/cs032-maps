@@ -6,10 +6,7 @@ import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.List;
 
-import com.javadocmd.simplelatlng.LatLng;
-
 import edu.brown.cs.is3.autocorrect.SuggestionHelper;
-import edu.brown.cs.is3.graph.Graph;
 import edu.brown.cs.is3.graph.Path;
 import edu.brown.cs.jc124.manager.MapsManager;
 import joptsimple.OptionException;
