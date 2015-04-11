@@ -29,10 +29,10 @@ public class Graph {
     this.db = db;
   }
 
-  // be wary of interesections and many streets with same names
+  // be wary of intersections and many streets with same names
   // ie cross of oak and maple
   // g is distance so far
-  // h is a heauristic
+  // h is a heuristic
   // f is the total distance (g + h)
   /**
    * Performs a graph-based Dijkstra's on a set of nodes based on a database.

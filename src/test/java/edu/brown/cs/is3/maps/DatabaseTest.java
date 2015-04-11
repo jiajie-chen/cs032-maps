@@ -218,7 +218,7 @@ public class DatabaseTest {
   }
 
   @Test
-  public void allNodeTest() throws ClassNotFoundException {
+  public void allKdMapNodeTest() throws ClassNotFoundException {
     try {
       Database db = new Database("/course/cs032/data/maps/smallMaps.sqlite3");
 

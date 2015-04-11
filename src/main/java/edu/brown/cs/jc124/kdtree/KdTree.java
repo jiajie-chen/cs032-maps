@@ -185,7 +185,7 @@ public class KdTree<T extends Coordinate> extends AbstractCollection<T>
 
   @Override
   public List<T> withinDistance(T point, double distance) {
-    if (distance <= 0) {
+    if (distance < 0) {
       throw new IllegalArgumentException("distance must be a positive");
     }
 

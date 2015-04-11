@@ -1,9 +1,13 @@
-var initMap = function(id) {
+var Map = function(id) {
+	// constants
+	this.STAND_LAT = 0; //standard parallel to use for projection
+	this.COS_STAND_LAT = Math.cos(STAND_LAT); // store for efficency
+
 	// init raphael to use given element with id
-	var element = document.getElementById(id);
-	var cWi = element.width(); // context width, height
-	var cHi = element.height();
-	var r = Raphael(element, w, h);
+	this.element = document.getElementById(id);
+	var cWi = this.element.width(); // context width, height
+	var cHi = this.element.height();
+	var r = Raphael(this.element, w, h);
 
 	// define constants for viewport
 	var toRad = Math.PI / 180;
@@ -12,29 +16,31 @@ var initMap = function(id) {
 	var vWi = 10 * toRad; // view width and height by radians of lat/lng
 	var vHi = vWi * (cHi/cWi); // use formula to roughly match context ratio
 
-	// create clear rect for drag operations
-	r.rect(0, 0, cWi, cHi).drag(function (dx, dy) {
+	this.viewport = {
+		origin: {lat: vLat, lng: vLng},
+		width: vWi,
+		height: vHi
+	};
 
-	});
-}
+	this.latlngToView = function(lat, lng) {
+		// x = lat * cos(standard parallel)
+		var x = lng * COS_STAND_LAT;
+		// y = dP
+		var y = lat;
 
-// requires an origin reference point (the top left of the viewport)
-var latlngToView = function(vLat, vLng, lat, lng) {
-	// phi is lat, lambda is lng
-    var p1 = vLat; // phi 1
-    var p2 = lat; // phi 2
-    var dP = p2 - p1; // delta of phi
-    var dL = lng - vLng; // delta of lambda
-    
-    // x = dL * cos(avg(p1, p2))
-    // y = dP
-    return {x:dP * Math.cos((p1 + p2)/2), y:dL};
-}
+		// This should be some normalized arc length or something, but might need some scaling
+		return {x:dP * Math.cos((p1 + p2)/2), y:dL};
+	};
 
-var viewToLatLng = function(x, y) {
+	this.viewToLatLng = function(x, y) {
+		
+	};
 
-}
+	this.loadTiles = function(url) {
 
-var loadTiles = function() {
+	};
 
+	this.translate = function(dx, dy) {
+
+	};
 }

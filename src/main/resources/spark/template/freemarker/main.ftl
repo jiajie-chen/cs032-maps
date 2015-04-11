@@ -36,9 +36,7 @@
   </div>
 
   <div id="mainDiv">
-    <!--
     <canvas id="mainCanvas"></canvas>
-    -->
   </div>
 
   </body>
