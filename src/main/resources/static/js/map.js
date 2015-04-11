@@ -1,7 +1,4 @@
 var Map = function(id) {
-	// constants
-	this.STAND_LAT = 0; //standard parallel to use for projection
-	this.COS_STAND_LAT = Math.cos(STAND_LAT); // store for efficency
 
 	// init raphael to use given element with id
 	this.element = document.getElementById(id);
@@ -22,14 +19,14 @@ var Map = function(id) {
 		height: vHi
 	};
 
+	// uses 
 	this.latlngToView = function(lat, lng) {
-		// x = lat * cos(standard parallel)
+		// x = lng * cos(standard parallel)
 		var x = lng * COS_STAND_LAT;
-		// y = dP
+		// y = lat
 		var y = lat;
 
-		// This should be some normalized arc length or something, but might need some scaling
-		return {x:dP * Math.cos((p1 + p2)/2), y:dL};
+		return {x:x, y:y};
 	};
 
 	this.viewToLatLng = function(x, y) {

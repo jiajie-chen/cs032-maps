@@ -9,12 +9,15 @@ import java.util.List;
 import edu.brown.cs.is3.autocorrect.SuggestionHelper;
 import edu.brown.cs.is3.graph.Path;
 import edu.brown.cs.jc124.manager.MapsManager;
+
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
 // SHOULD BE TESTING PARSING SOMEWHERE AND MAYBE FACTOR STUFF FROM MAIN
+// TURNS OUT THE DATA ENTRY IN MAPS.SQLITE3 IS THE BIGGEST NIGHTMARE EVER
+// AND ONLY SORT OF GETS YOU THE KIND OF THINGS YOU WOULD WANT
 
 /**
  * Main class implementing maps, including shortest path searches, auto
@@ -132,7 +135,7 @@ public class Main implements Runnable {
       System.err.println("ERROR: " + e.getMessage());
       return;
     }
-    
+
     try {
       manager = new MapsManager(db);
     } catch (RuntimeException e1) {
@@ -190,26 +193,26 @@ public class Main implements Runnable {
         return;
       } else {
         Path path = null;
-        
+
         if (containsDoubles(argsList)) {
           Double lat1 = Double.parseDouble(argsList.get(0));
           Double lng1 = Double.parseDouble(argsList.get(1));
-          
+
           Double lat2 = Double.parseDouble(argsList.get(2));
           Double lng2 = Double.parseDouble(argsList.get(3));
 
-          //System.out.println("" + start + end);
           path = manager.getPathByPoints(lat1, lng1, lat2, lng2);
         } else { // maybe needs checks for "" or regexes somewhere!!!!!!!
           String startStreet = argsList.get(0).replace("\"", "");
           String startCross = argsList.get(1).replace("\"", "");
-          
+
           String endStreet = argsList.get(2).replace("\"", "");
           String endCross = argsList.get(3).replace("\"", "");
 
-          path = manager.getPathByIntersections(startStreet, startCross, endStreet, endCross);
+          path = manager.getPathByIntersections(startStreet, startCross,
+              endStreet, endCross);
         }
-        
+
         System.out.println(path);
       }
 

@@ -6,7 +6,8 @@ import edu.brown.cs.jc124.kdtree.DimensionMismatchException;
 /**
  * @author jchen
  *
- *         Class that stores 2-dimensional latitude and longitudes, as radians. Distances are in miles.
+ *         Class that stores 2-dimensional latitude and longitudes, as radians.
+ *         Distances are in miles.
  */
 public class RadianLatLng implements Coordinate {
   // probably will never change, but good convention I guess
@@ -15,16 +16,14 @@ public class RadianLatLng implements Coordinate {
   public static final int LNG_AXIS = 1;
   // earth's radius, for distances (in mile)
   private static final int EARTH_RADIUS = 6371000;
-  
+
   private double lat, lng;
 
   /**
    * Creates a new LatLng point with the given fields.
    *
-   * @param lat
-   *          the latitude of the point, in radians
-   * @param lng
-   *          the longitude of the point, in radians
+   * @param lat the latitude of the point, in radians
+   * @param lng the longitude of the point, in radians
    */
   public RadianLatLng(double lat, double lng) {
     this.lat = lat;
@@ -47,16 +46,16 @@ public class RadianLatLng implements Coordinate {
     switch (axis) {
       case LAT_AXIS:
         return lat;
-  
+
       case LNG_AXIS:
         return lng;
-        
+
       default:
         throw new IndexOutOfBoundsException(
             "axis is out of bounds of dimensions");
     }
   }
-  
+
   /**
    * Gets the latitude of this point.
    * @return the latitude in radians
@@ -64,7 +63,7 @@ public class RadianLatLng implements Coordinate {
   public double getLat() {
     return getField(LAT_AXIS);
   }
-  
+
   /**
    * Gets the longitude of this point.
    * @return the longitude in radians
@@ -78,15 +77,16 @@ public class RadianLatLng implements Coordinate {
     if (c instanceof RadianLatLng) {
       return haversine((RadianLatLng) c);
     } else {
-      throw new DimensionMismatchException("this RadianLatLng can only get distance to another RadianLatLng");
+      throw new DimensionMismatchException(
+          "this RadianLatLng can only get distance to another RadianLatLng");
     }
   }
-  
+
   @Override
   public double squaredDistance(Coordinate c) {
     return Math.pow(distance(c), 2);
   }
-  
+
   // haversine formula for great circle distance
   private double haversine(RadianLatLng l) {
     // phi is lat, lambda is lng
@@ -94,19 +94,19 @@ public class RadianLatLng implements Coordinate {
     double p2 = l.getLat(); // phi 2
     double dP = p2 - p1; // delta of phi
     double dL = l.getLng() - getLng(); // delta of lambda
-    
+
     // a = sin^2(dP/2) + cos(p1) * cos(p2) * sin^2(dL/2)
     double a =
-        Math.pow(Math.sin(dP/2), 2) +
-        Math.cos(p1) * Math.cos(p2) *
-        Math.pow(Math.sin(dL/2), 2);
+        Math.pow(Math.sin(dP / 2), 2) +
+            Math.cos(p1) * Math.cos(p2) *
+            Math.pow(Math.sin(dL / 2), 2);
     // c = 2 * atan2(sqrt(a), sqrt(1-a))
     double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     // d = radius * c
     double d = EARTH_RADIUS * c;
     return d;
   }
-  
+
   /*
   // faster square distance approximator using equirectangular projection
   private double equirectangularSq(RadianLatLng l) {
@@ -129,5 +129,26 @@ public class RadianLatLng implements Coordinate {
   @Override
   public int getDimensions() {
     return LATLNG_DIM;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+
+    if (!(obj instanceof RadianLatLng)) {
+      return false;
+    }
+
+    RadianLatLng r = (RadianLatLng) obj;
+
+    return this.lat == r.lat && this.lng == r.lng;
+  }
+
+  @Override
+  public int hashCode() {
+    return (LATLNG_DIM * Double.hashCode(lat))
+        ^ (EARTH_RADIUS * Double.hashCode(lng));
   }
 }

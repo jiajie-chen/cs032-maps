@@ -1,8 +1,8 @@
 package edu.brown.cs.is3.maps;
 
 /**
- * @author jchen
- * A dummy version of Node used to store node positional info in a KD tree.
+ * @author jchen A dummy version of Node used to store node positional info in a
+ *         KD tree.
  */
 public class KdMapNode extends RadianLatLng {
   private String nodeId;
@@ -14,5 +14,25 @@ public class KdMapNode extends RadianLatLng {
 
   public String getId() {
     return this.nodeId;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+
+    if (!(obj instanceof KdMapNode)) {
+      return false;
+    }
+
+    KdMapNode n = (KdMapNode) obj;
+
+    return this.nodeId.equals(n.nodeId);
+  }
+
+  @Override
+  public int hashCode() {
+    return nodeId.hashCode();
   }
 }
