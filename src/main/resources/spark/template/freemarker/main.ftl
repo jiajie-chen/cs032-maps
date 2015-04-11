@@ -7,8 +7,9 @@
     <link rel="stylesheet" href="/css/main.css">
     <link href="http://fonts.googleapis.com/css?family=Merienda+One" rel="stylesheet" type="text/css">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="/js/main.js"></script>
+    <script src="/js/autocorrect.js"></script>
     <script src="/js/map.js"></script>
+    <script src="/js/main.js"></script>
     
     <title>${title}</title>
   </head>
@@ -36,7 +37,7 @@
   </div>
 
   <div id="mainDiv">
-    <canvas id="mainCanvas"></canvas>
+    <canvas id="mapCanvas"></canvas>
   </div>
 
   </body>
