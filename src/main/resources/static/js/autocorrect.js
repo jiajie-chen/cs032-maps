@@ -1,35 +1,35 @@
 var Autocorrect = function(inputID, listID) {
 	this.inputElement = document.getElementById(inputID);
 	this.listElement = document.getElementById(listID);
-	this._this = this; // for functions calls outside of this object
 
 	this.displaySuggestions = function(suggestionsList) {
-      this.listElement.innerHTML = "";
+		this.listElement.innerHTML = "";
 
-      if (suggestionsList == null || suggestionsList.length == 0) {
-        return;
-      }
+		if (suggestionsList == null || suggestionsList.length == 0) {
+			return;
+		}
 
-      for (var i = 0; i < suggestionsList.length; i++) {
-        var option = new Option("", suggestionsList[i]);
-        this.listElement.appendChild(option);
-      }
+		for (var i = 0; i < suggestionsList.length; i++) {
+			var option = new Option("", suggestionsList[i]);
+			this.listElement.appendChild(option);
+		}
 
-      return;
-    }
+		return;
+	}
 
+	var _this = this; // for functions calls outside of this object (like in event handlers)
     this.inputElement.addEventListener("keyup", function(event) {
-      var text = this.value;
+		var text = this.value;
 
-      var postParameters = {inputStart: JSON.stringify(text)};
-      console.log(postParameters);
+		var postParameters = {inputStart: JSON.stringify(text)};
+		console.log(postParameters);
 
-      $.post("/suggestions", postParameters, function(responseJSON) {
-        console.log("Received suggestions: " + responseJSON);
-        responseObject = JSON.parse(responseJSON);
-        var suggestionsList = responseObject.startSuggestions;
+		$.post("/suggestions", postParameters, function(responseJSON) {
+			console.log("Received suggestions: " + responseJSON);
+			responseObject = JSON.parse(responseJSON);
+			var suggestionsList = responseObject.startSuggestions;
 
-        _this.displaySuggestions(suggestionsList);
-      });
-    });
+			_this.displaySuggestions(suggestionsList);
+		});
+	});
 }
