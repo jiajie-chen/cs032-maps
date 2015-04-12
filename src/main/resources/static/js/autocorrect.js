@@ -1,7 +1,7 @@
 var Autocorrect = function(inputID, listID) {
 	this.inputElement = document.getElementById(inputID);
 	this.listElement = document.getElementById(listID);
-	_this = this; // for functions calls outside of this object
+	this._this = this; // for functions calls outside of this object
 
 	this.displaySuggestions = function(suggestionsList) {
       this.listElement.innerHTML = "";
