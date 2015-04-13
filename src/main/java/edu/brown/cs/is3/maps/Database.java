@@ -255,6 +255,8 @@ public class Database {
     return toReturn;
   }
 
+  // REWRITE THIS TO USE ONE QUERY AND JOIN
+  // MAYBE UNION TWO JOINS
   /**
    * Searches for and returns a tile containing a set of compact ways based on
    * the northwest corner with a width specified by TILE_SIZE.
@@ -273,44 +275,37 @@ public class Database {
     }
 
     Set<CompactWay> ways = new HashSet<>();
-    String wayQuery = "SELECT start, end FROM way;";
-    String nodeQuery = "SELECT latitude, longitude FROM node WHERE (id = ? OR id = ?) "
-        + "AND latitude < ? AND latitude > ? AND longitude > ? AND longitude < ?;";
+    String wayQuery = "SELECT s.latitude, s.longitude, e.latitude, e.longitude "
+        + "FROM way AS w INNER JOIN node AS s ON w.start = s.id "
+        + "INNER JOIN e ON w.end = e.id "
+        + "WHERE (e.latitude < ? AND e.latitude > ? "
+        + "AND e.longitude > ? AND e.longitude < ?) "
+        + "OR (s.latitude < ? AND s.latitude > ? "
+        + "AND s.longitude > ? AND s.longitude < ?);";
 
-    try (PreparedStatement wayPS = conn.prepareStatement(wayQuery);
-        PreparedStatement nodePS = conn.prepareStatement(nodeQuery)) {
+    try (PreparedStatement wayPS = conn.prepareStatement(wayQuery)) {
+      for (int i = 0; i < 2; i++) {
+        wayPS.setDouble(i + 1, top);
+        wayPS.setDouble(i + 2, bot);
+        wayPS.setDouble(i + 3, left);
+        wayPS.setDouble(i + 4, right);
+      }
+
       try (ResultSet wayRS = wayPS.executeQuery()) {
 
         while (wayRS.next()) {
-          String startId = wayRS.getString(1);
-          String endId = wayRS.getString(2);
 
-          nodePS.setString(1, startId);
-          nodePS.setString(2, endId);
-          nodePS.setDouble(3, top);
-          nodePS.setDouble(4, bot);
-          nodePS.setDouble(5, left);
-          nodePS.setDouble(6, right);
+          boolean first = wayRS.next();
+          RadianLatLng start = new RadianLatLng(
+              Double.parseDouble(wayRS.getString(1)),
+              Double.parseDouble(wayRS.getString(2)));
 
-          try (ResultSet nodeRS = nodePS.executeQuery()) {
-            // node order not guaranteed
+          boolean second = wayRS.next();
+          RadianLatLng end = new RadianLatLng(
+              Double.parseDouble(wayRS.getString(3)),
+              Double.parseDouble(wayRS.getString(4)));
 
-            boolean first = nodeRS.next();
-            RadianLatLng start = new RadianLatLng(
-                Double.parseDouble(nodeRS.getString(1)),
-                Double.parseDouble(nodeRS.getString(2)));
-
-            boolean second = nodeRS.next();
-            RadianLatLng end = new RadianLatLng(
-                Double.parseDouble(nodeRS.getString(1)),
-                Double.parseDouble(nodeRS.getString(2)));
-
-            if (!(first && second && !nodeRS.next())) {
-              throw new RuntimeException("Could not locate nodes in box.");
-            }
-
-            ways.add(new CompactWay(start, end));
-          }
+          ways.add(new CompactWay(start, end));
         }
 
       }
