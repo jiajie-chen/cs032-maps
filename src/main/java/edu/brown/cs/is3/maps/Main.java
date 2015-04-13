@@ -19,6 +19,11 @@ import joptsimple.OptionSpec;
 // TURNS OUT THE DATA ENTRY IN MAPS.SQLITE3 IS THE BIGGEST NIGHTMARE EVER
 // AND ONLY SORT OF GETS YOU THE KIND OF THINGS YOU WOULD WANT
 
+// OPTIMIZATION INCLUDING: REMOVE IMMUTABLE, CHANGE COMPARATOR, BUILD MORE OBJECTS
+
+// MAYBE MAKE RADIANLATLNG EXTEND SIMPLE LAT LNG FOR CONVENIENCE
+// DO TONS OF TESTING AND OPTIMIZATION
+
 /**
  * Main class implementing maps, including shortest path searches, auto
  * correction, and nearest neighbor searches based on both the command line and

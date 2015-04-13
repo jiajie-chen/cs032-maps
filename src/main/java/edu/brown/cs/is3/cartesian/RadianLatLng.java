@@ -1,4 +1,4 @@
-package edu.brown.cs.is3.maps;
+package edu.brown.cs.is3.cartesian;
 
 import edu.brown.cs.jc124.kdtree.Coordinate;
 import edu.brown.cs.jc124.kdtree.DimensionMismatchException;

@@ -5,6 +5,8 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 
+import edu.brown.cs.is3.cartesian.RadianLatLng;
+
 /**
  * Class representing a node object in the database;
  * @author is3

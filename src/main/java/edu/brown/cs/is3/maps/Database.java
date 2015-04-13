@@ -11,6 +11,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import edu.brown.cs.is3.cartesian.RadianLatLng;
+import edu.brown.cs.is3.cartesian.Tile;
+
 /**
  * Class for interacting with the maps database and building objects from data.
  * @author is3
@@ -21,6 +24,8 @@ public class Database {
   private final Connection conn;
   private final Map<String, Way> wayById = new HashMap<>();
   private final Map<String, Node> nodeById = new HashMap<>();
+  private final Map<RadianLatLng, Tile> tileByCorner = new HashMap<>();
+  private static final double TILE_SIZE = .1;
 
   /**
    * Constructs a db.
@@ -130,7 +135,7 @@ public class Database {
   }
 
   /**
-   * Searches for and returns the way with the given id;
+   * Searches for and returns the way with the given id.
    * @param id to search for.
    * @return the way with that id.
    */
@@ -139,7 +144,8 @@ public class Database {
       return wayById.get(id);
     }
 
-    String wayQuery = "SELECT name, start, end FROM way WHERE id = ? LIMIT 1;";
+    String wayQuery = "SELECT name, start, end FROM way WHERE id = ? ;"; // LIMIT
+                                                                         // 1;";
 
     try (PreparedStatement wayPS = conn.prepareStatement(wayQuery)) {
       wayPS.setString(1, id);
@@ -170,7 +176,7 @@ public class Database {
 
   /**
    * Finds an intersection between two streets with a given name. If multiple
-   * such intersections exist, it returns one such intersection.
+   * such intersections exist, it returns one such intersection. Does not cache.
    * @param streetName first street.
    * @param crossName second street.
    * @return
@@ -191,7 +197,7 @@ public class Database {
         + "SELECT street.end FROM way AS street INNER JOIN way AS cross "
         + "ON street.end = cross.end WHERE "
         + "(street.name = ? AND cross.name = ?) OR (street.name = ? AND cross.name = ?) "
-        + "LIMIT 1;";
+        + ";"; // "LIMIT 1;";
 
     try (PreparedStatement interPS = conn.prepareStatement(interQuery)) {
       for (int i = 1; i < 17; i += 4) {
@@ -230,7 +236,7 @@ public class Database {
 
     try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery)) {
       try (ResultSet nodeRS = nodePS.executeQuery()) {
-        
+
         while (nodeRS.next()) {
           String nodeId = nodeRS.getString(1);
           Double lat = Double.parseDouble(nodeRS.getString(2));
@@ -239,13 +245,82 @@ public class Database {
           KdMapNode n = new KdMapNode(nodeId, lat, lng);
           toReturn.add(n);
         }
-        
+
       }
     } catch (SQLException e) {
       close();
       throw new RuntimeException(e);
     }
-    
+
+    return toReturn;
+  }
+
+  /**
+   * Searches for and returns a tile containing a set of compact ways based on
+   * the northwest corner with a width specified by TILE_SIZE.
+   * @param nw
+   * @return
+   */
+  public Tile tileOfCorner(RadianLatLng nw) {
+    Tile toReturn;
+    double top = nw.getLat();
+    double bot = top - TILE_SIZE;
+    double left = nw.getLng();
+    double right = left + TILE_SIZE;
+
+    if ((toReturn = tileByCorner.get(nw)) != null) {
+      return toReturn;
+    }
+
+    Set<CompactWay> ways = new HashSet<>();
+    String wayQuery = "SELECT start, end FROM way;";
+    String nodeQuery = "SELECT latitude, longitude FROM node WHERE (id = ? OR id = ?) "
+        + "AND latitude < ? AND latitude > ? AND longitude > ? AND longitude < ?;";
+
+    try (PreparedStatement wayPS = conn.prepareStatement(wayQuery);
+        PreparedStatement nodePS = conn.prepareStatement(nodeQuery)) {
+      try (ResultSet wayRS = wayPS.executeQuery()) {
+
+        while (wayRS.next()) {
+          String startId = wayRS.getString(1);
+          String endId = wayRS.getString(2);
+
+          nodePS.setString(1, startId);
+          nodePS.setString(2, endId);
+          nodePS.setDouble(3, top);
+          nodePS.setDouble(4, bot);
+          nodePS.setDouble(5, left);
+          nodePS.setDouble(6, right);
+
+          try (ResultSet nodeRS = nodePS.executeQuery()) {
+            // node order not guaranteed
+
+            boolean first = nodeRS.next();
+            RadianLatLng start = new RadianLatLng(
+                Double.parseDouble(nodeRS.getString(1)),
+                Double.parseDouble(nodeRS.getString(2)));
+
+            boolean second = nodeRS.next();
+            RadianLatLng end = new RadianLatLng(
+                Double.parseDouble(nodeRS.getString(1)),
+                Double.parseDouble(nodeRS.getString(2)));
+
+            if (!(first && second && !nodeRS.next())) {
+              throw new RuntimeException("Could not locate nodes in box.");
+            }
+
+            ways.add(new CompactWay(start, end));
+          }
+        }
+
+      }
+    } catch (SQLException e) {
+      close();
+      throw new RuntimeException(e);
+    }
+
+    toReturn = new Tile(nw, TILE_SIZE, ways);
+    tileByCorner.put(nw, toReturn);
     return toReturn;
   }
 }

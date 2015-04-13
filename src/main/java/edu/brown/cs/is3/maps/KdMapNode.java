@@ -1,5 +1,7 @@
 package edu.brown.cs.is3.maps;
 
+import edu.brown.cs.is3.cartesian.RadianLatLng;
+
 /**
  * @author jchen A dummy version of Node used to store node positional info in a
  *         KD tree.
