@@ -1,5 +1,0 @@
-command 8 9
-radius -9 0 0 0
-neighbor 3
-neighbor 4.9 "Sol"
-radius 2.3 "sf
