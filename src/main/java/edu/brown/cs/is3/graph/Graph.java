@@ -19,6 +19,7 @@ import edu.brown.cs.is3.maps.Way;
  */
 public class Graph {
   private final Database db;
+  private final Map<String, Double> traffic;
   private Node start;
 
   /**
@@ -27,6 +28,12 @@ public class Graph {
    */
   public Graph(Database db) {
     this.db = db;
+    this.traffic = null;
+  }
+
+  public Graph(Database db, Map<String, Double> traffic) {
+    this.db = db;
+    this.traffic = traffic;
   }
 
   // be wary of intersections and many streets with same names

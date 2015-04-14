@@ -1,6 +1,7 @@
 package edu.brown.cs.jc124.manager;
 
 import java.util.List;
+import java.util.Map;
 
 import edu.brown.cs.is3.autocorrect.SuggestionHelper;
 import edu.brown.cs.is3.graph.Graph;
@@ -40,6 +41,15 @@ public class MapsManager {
    */
   private Path getShortestPath(Node start, Node end) {
     Graph g = new Graph(db);
+
+    Path path = g.dijkstras(start, end);
+    return path;
+  }
+
+  private Path getShortestPathTraffic(
+      Node start, Node end, Map<String, Double> traffic) {
+
+    Graph g = new Graph(db, traffic);
 
     Path path = g.dijkstras(start, end);
     return path;
@@ -89,4 +99,5 @@ public class MapsManager {
   public List<String> suggest(String[] words) {
     return autocorrect.suggest(words);
   }
+
 }

@@ -128,7 +128,7 @@ public class Server implements Runnable {
         endCross = gson.fromJson(qm.value("inputStart"), String.class);
 
         toReturn = m.getPathByIntersections(
-            startStreet, startCross, endStreet, endCross);
+            startStreet, startCross, endStreet, endCross, traffic);
       } else {
         // TODO
         toReturn = null;
@@ -167,7 +167,8 @@ public class Server implements Runnable {
 
         toReturn = m.getPathByPoints(
             startPoint.getLat(), startPoint.getLng(),
-            endPoint.getLat(), endPoint.getLng());
+            endPoint.getLat(), endPoint.getLng(),
+            traffic);
       } else {
         // TODO
         toReturn = null;
