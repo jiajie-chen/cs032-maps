@@ -25,7 +25,6 @@ public class Database {
   private final Map<String, Way> wayById = new HashMap<>();
   private final Map<String, Node> nodeById = new HashMap<>();
   private final Map<RadianLatLng, Tile> tileByCorner = new HashMap<>();
-  private static final double TILE_SIZE = .01;
 
   /**
    * Constructs a db.
@@ -254,29 +253,31 @@ public class Database {
     return toReturn;
   }
 
+  // DOUBLE CHECK THIS GETS EVERYTHING AHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
   /**
    * Searches for and returns a tile containing a set of compact ways based on
-   * the northwest corner with a width specified by TILE_SIZE.
+   * the northwest corner with a width specified by TILE_SIZE. Assumes there can
+   * only be one tile beginning at a given point.
    * @param nw
    * @return
    */
-  public Tile tileOfCorner(RadianLatLng nw) {
+  public Tile tileOfCorner(RadianLatLng nw, double width) {
     Tile toReturn;
-
-    double top = nw.getLat();
-    double bot = top - TILE_SIZE;
-    double left = nw.getLng();
-    double right = left + TILE_SIZE;
 
     if ((toReturn = tileByCorner.get(nw)) != null) {
       return toReturn;
     }
 
+    double top = nw.getLat();
+    double bot = top - width;
+    double left = nw.getLng();
+    double right = left + width;
+
     Set<CompactWay> ways = new HashSet<>();
     String wayQuery = "SELECT s.latitude, s.longitude, w.end "
         + "FROM way AS w INNER JOIN node AS s ON w.start = s.id "
-        + "WHERE (s.latitude < ? AND s.latitude > ? "
-        + "AND s.longitude > ? AND s.longitude < ?);";
+        + "WHERE (s.latitude <= ? AND s.latitude >= ? "
+        + "AND s.longitude >= ? AND s.longitude <= ?);";
 
     try (PreparedStatement wayPS = conn.prepareStatement(wayQuery)) {
       wayPS.setDouble(1, top);
@@ -302,7 +303,7 @@ public class Database {
       throw new RuntimeException(e);
     }
 
-    toReturn = new Tile(nw, TILE_SIZE, ways);
+    toReturn = new Tile(nw, width, ways);
     tileByCorner.put(nw, toReturn);
     return toReturn;
   }
@@ -327,8 +328,8 @@ public class Database {
         Double lng;
 
         if (nodeRS.next()) {
-          lat = Double.parseDouble(nodeRS.getString(2));
-          lng = Double.parseDouble(nodeRS.getString(3));
+          lat = Double.parseDouble(nodeRS.getString(1));
+          lng = Double.parseDouble(nodeRS.getString(2));
         } else {
           close();
           throw new RuntimeException("No node with that id.");

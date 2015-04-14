@@ -24,6 +24,7 @@ import joptsimple.OptionSpec;
 // DO TONS OF TESTING AND OPTIMIZATION
 
 // DO TESTING, COMMENTING, STYLE, TRAFFIC, DRAWING
+// TEST PARSING, ISDOUBLE, DB, SYSTEM
 
 /**
  * Main class implementing maps, including shortest path searches, auto

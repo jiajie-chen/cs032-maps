@@ -17,7 +17,7 @@ public class RadianLatLng implements Coordinate {
   // earth's radius, for distances (in mile)
   private static final int EARTH_RADIUS = 6371000;
 
-  private double lat, lng;
+  private final double lat, lng;
 
   /**
    * Creates a new LatLng point with the given fields.
@@ -108,27 +108,25 @@ public class RadianLatLng implements Coordinate {
   }
 
   /*
-  // faster square distance approximator using equirectangular projection
-  private double equirectangularSq(RadianLatLng l) {
-    // phi is lat, lambda is lng
-    double p1 = getLat(); // phi 1
-    double p2 = l.getLat(); // phi 2
-    double dP = p2 - p1; // delta of phi
-    double dL = l.getLng() - getLng(); // delta of lambda
-    
-    // x = dL * cos(avg(p1, p2))
-    double x = dL * Math.cos((p1 + p2)/2);
-    // y = dP
-    double y = dP;
-    // d = R * sqrt(x^2 + y^2), d^2 = R^2 * (x^2 + y^2)
-    double d2 = EARTH_RADIUS * EARTH_RADIUS * (x*x + y*y);
-    return d2;
-  }
-  //*/
+   * // faster square distance approximator using equirectangular projection
+   * private double equirectangularSq(RadianLatLng l) { // phi is lat, lambda is
+   * lng double p1 = getLat(); // phi 1 double p2 = l.getLat(); // phi 2 double
+   * dP = p2 - p1; // delta of phi double dL = l.getLng() - getLng(); // delta
+   * of lambda
+   * 
+   * // x = dL * cos(avg(p1, p2)) double x = dL * Math.cos((p1 + p2)/2); // y =
+   * dP double y = dP; // d = R * sqrt(x^2 + y^2), d^2 = R^2 * (x^2 + y^2)
+   * double d2 = EARTH_RADIUS * EARTH_RADIUS * (x*x + y*y); return d2; } //
+   */
 
   @Override
   public int getDimensions() {
     return LATLNG_DIM;
+  }
+
+  @Override
+  public String toString() {
+    return "(" + lat + ", " + lng + ")";
   }
 
   @Override

@@ -32,7 +32,7 @@ public class MapsManager {
   }
 
   /**
-   * Returns the shortest path between two points based on a database.
+   * Returns the shortest path between two nodes based on a database.
    * @param start point.
    * @param end point.
    * @return list of ways as a path along the shortest path between the points
@@ -45,6 +45,15 @@ public class MapsManager {
     return path;
   }
 
+  /**
+   * Returns the shortest path between two points based on a database.
+   * @param lat1 lat of first point.
+   * @param lng1 lng of first point.
+   * @param lat2 lat of second point.
+   * @param lng2 lng of second point.
+   * @return list of ways as a path along the shortest path between the points
+   *         or a path with a null list of ways if no path exists.
+   */
   public Path getPathByPoints(Double lat1, Double lng1, Double lat2, Double lng2) {
     KdMapNode closestStart = mapsKd.getPointClosest(lat1, lng1);
     KdMapNode closestEnd = mapsKd.getPointClosest(lat2, lng2);

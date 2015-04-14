@@ -1,4 +1,4 @@
-package edu.brown.cs.is3.maps;
+package edu.brown.cs.is3.cartesian;
 
 import static org.junit.Assert.*;
 
