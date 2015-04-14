@@ -3,7 +3,7 @@ package edu.brown.cs.is3.maps;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableSet;
+import edu.brown.cs.is3.cartesian.RadianLatLng;
 
 /**
  * Class representing a node object in the database;
@@ -49,7 +49,6 @@ public class Node {
   public RadianLatLng getPos() {
     return this.pos;
   }
-  
 
   /**
    * Finds the distance along the surface of the globe from this node to another
@@ -58,15 +57,14 @@ public class Node {
    * @return distance along the globe between this and end.
    */
   public double getDistance(Node end) {
-    return this.getPos().distance(end.getPos());
+    return this.pos.distance(end.getPos());
   }
 
   /**
-   * @return an immutable list of the ids of the way connected to this node.
+   * @return an list of the ids of the way connected to this node.
    */
   public Set<String> getWayIDs() {
-    return ImmutableSet.copyOf(this.wayIDs); // maybe should get rid of copy
-                                             // for performance
+    return this.wayIDs; // can be immutable, but trades performance
   }
 
   /**
@@ -94,7 +92,7 @@ public class Node {
 
     Node n = (Node) o;
 
-    return this.getId().equals(n.getId());
+    return this.id.equals(n.id);
   }
 
   @Override

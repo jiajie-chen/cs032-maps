@@ -11,6 +11,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import edu.brown.cs.is3.cartesian.RadianLatLng;
+import edu.brown.cs.is3.cartesian.Tile;
+
 /**
  * Class for interacting with the maps database and building objects from data.
  * @author is3
@@ -21,6 +24,7 @@ public class Database {
   private final Connection conn;
   private final Map<String, Way> wayById = new HashMap<>();
   private final Map<String, Node> nodeById = new HashMap<>();
+  private final Map<RadianLatLng, Tile> tileByCorner = new HashMap<>();
 
   /**
    * Constructs a db.
@@ -130,7 +134,7 @@ public class Database {
   }
 
   /**
-   * Searches for and returns the way with the given id;
+   * Searches for and returns the way with the given id.
    * @param id to search for.
    * @return the way with that id.
    */
@@ -139,7 +143,8 @@ public class Database {
       return wayById.get(id);
     }
 
-    String wayQuery = "SELECT name, start, end FROM way WHERE id = ? LIMIT 1;";
+    String wayQuery = "SELECT name, start, end FROM way WHERE id = ? ;"; // LIMIT
+                                                                         // 1;";
 
     try (PreparedStatement wayPS = conn.prepareStatement(wayQuery)) {
       wayPS.setString(1, id);
@@ -170,7 +175,7 @@ public class Database {
 
   /**
    * Finds an intersection between two streets with a given name. If multiple
-   * such intersections exist, it returns one such intersection.
+   * such intersections exist, it returns one such intersection. Does not cache.
    * @param streetName first street.
    * @param crossName second street.
    * @return
@@ -191,7 +196,7 @@ public class Database {
         + "SELECT street.end FROM way AS street INNER JOIN way AS cross "
         + "ON street.end = cross.end WHERE "
         + "(street.name = ? AND cross.name = ?) OR (street.name = ? AND cross.name = ?) "
-        + "LIMIT 1;";
+        + ";"; // "LIMIT 1;";
 
     try (PreparedStatement interPS = conn.prepareStatement(interQuery)) {
       for (int i = 1; i < 17; i += 4) {
@@ -230,7 +235,7 @@ public class Database {
 
     try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery)) {
       try (ResultSet nodeRS = nodePS.executeQuery()) {
-        
+
         while (nodeRS.next()) {
           String nodeId = nodeRS.getString(1);
           Double lat = Double.parseDouble(nodeRS.getString(2));
@@ -239,13 +244,102 @@ public class Database {
           KdMapNode n = new KdMapNode(nodeId, lat, lng);
           toReturn.add(n);
         }
-        
       }
     } catch (SQLException e) {
       close();
       throw new RuntimeException(e);
     }
-    
+
     return toReturn;
+  }
+
+  // DOUBLE CHECK THIS GETS EVERYTHING AHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
+  /**
+   * Searches for and returns a tile containing a set of compact ways based on
+   * the northwest corner with a width specified by TILE_SIZE. Assumes there can
+   * only be one tile beginning at a given point.
+   * @param nw
+   * @return
+   */
+  public Tile tileOfCorner(RadianLatLng nw, double width) {
+    Tile toReturn;
+
+    if ((toReturn = tileByCorner.get(nw)) != null) {
+      return toReturn;
+    }
+
+    double top = nw.getLat();
+    double bot = top - width;
+    double left = nw.getLng();
+    double right = left + width;
+
+    Set<CompactWay> ways = new HashSet<>();
+    String wayQuery = "SELECT s.latitude, s.longitude, w.end "
+        + "FROM way AS w INNER JOIN node AS s ON w.start = s.id "
+        + "WHERE (s.latitude <= ? AND s.latitude >= ? "
+        + "AND s.longitude >= ? AND s.longitude <= ?);";
+
+    try (PreparedStatement wayPS = conn.prepareStatement(wayQuery)) {
+      wayPS.setDouble(1, top);
+      wayPS.setDouble(2, bot);
+      wayPS.setDouble(3, left);
+      wayPS.setDouble(4, right);
+
+      try (ResultSet wayRS = wayPS.executeQuery()) {
+
+        while (wayRS.next()) {
+
+          RadianLatLng start = new RadianLatLng(
+              Double.parseDouble(wayRS.getString(1)),
+              Double.parseDouble(wayRS.getString(2)));
+
+          RadianLatLng end = coordinatesOfId(wayRS.getString(3));
+
+          ways.add(new CompactWay(start, end));
+        }
+      }
+    } catch (SQLException e) {
+      close();
+      throw new RuntimeException(e);
+    }
+
+    toReturn = new Tile(nw, width, ways);
+    tileByCorner.put(nw, toReturn);
+    return toReturn;
+  }
+
+  /**
+   * Generates the coordinate object for a node given its id.
+   * @param id of node to look for.
+   * @return position object for that node.
+   */
+  public RadianLatLng coordinatesOfId(String id) {
+    if (nodeById.get(id) != null) {
+      return nodeById.get(id).getPos();
+    }
+
+    String nodeQuery = "SELECT node.latitude, node.longitude FROM node WHERE node.id = ?;";
+
+    try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery)) {
+      nodePS.setString(1, id);
+
+      try (ResultSet nodeRS = nodePS.executeQuery()) {
+        Double lat;
+        Double lng;
+
+        if (nodeRS.next()) {
+          lat = Double.parseDouble(nodeRS.getString(1));
+          lng = Double.parseDouble(nodeRS.getString(2));
+        } else {
+          close();
+          throw new RuntimeException("No node with that id.");
+        }
+
+        return new RadianLatLng(lat, lng);
+      }
+    } catch (SQLException e) {
+      close();
+      throw new RuntimeException(e);
+    }
   }
 }

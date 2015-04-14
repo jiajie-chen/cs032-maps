@@ -1,9 +1,0 @@
-ERROR: jjjjjj not in database
-USAGE:
---port <number> - the port to open the gui on (default 4567).
---gui - Activate the GUI
-
-Parameters (in order):
-<actor 1>
-<actor 2>
-<filename> - SQLite database

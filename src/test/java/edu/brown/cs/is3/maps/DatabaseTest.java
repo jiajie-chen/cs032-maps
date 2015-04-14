@@ -9,6 +9,9 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 
+import edu.brown.cs.is3.cartesian.RadianLatLng;
+import edu.brown.cs.is3.cartesian.Tile;
+
 import org.junit.Test;
 
 public class DatabaseTest {
@@ -231,6 +234,46 @@ public class DatabaseTest {
       }
 
       assertTrue(a.equals(all));
+    } catch (SQLException e) {
+      fail(e.getMessage());
+    }
+  }
+
+  @Test
+  public void tileOfCornerTest() throws ClassNotFoundException {
+    try {
+      Database db = new Database("/course/cs032/data/maps/smallMaps.sqlite3");
+
+      Tile empty = db.tileOfCorner(new RadianLatLng(), 1.0);
+      Tile less = db.tileOfCorner(new RadianLatLng(1, 1), 0.0);
+      Tile two = db.tileOfCorner(new RadianLatLng(41.82, -71.4), 0);
+      Tile six = db.tileOfCorner(new RadianLatLng(41.8203, -71.4003), .0003);
+      Tile all = db.tileOfCorner(new RadianLatLng(41.8206, -71.4003), .01);
+
+      RadianLatLng[] cords = new RadianLatLng[6];
+      for (int i = 0; i < 6; i++) {
+        Node n = db.nodeOfId("/n/" + i);
+        cords[i] = n.getPos();
+      }
+
+      Set<CompactWay> s = new HashSet<>();
+      assertTrue(empty.equals(new Tile(new RadianLatLng(), 1, s)));
+      assertTrue(less.equals(new Tile(new RadianLatLng(1, 1), 0, s)));
+
+      s.add(new CompactWay(cords[0], cords[1]));
+      s.add(new CompactWay(cords[0], cords[3]));
+      assertTrue(two.equals(new Tile(cords[0], 0, s)));
+
+      s.add(new CompactWay(cords[1], cords[4]));
+      s.add(new CompactWay(cords[3], cords[4]));
+      s.add(new CompactWay(cords[1], cords[2]));
+      s.add(new CompactWay(cords[4], cords[5]));
+      assertTrue(six.equals(
+          new Tile(new RadianLatLng(41.8203, -71.4003), .0003, s)));
+
+      s.add(new CompactWay(cords[2], cords[5]));
+      assertTrue(all.equals(
+          new Tile(new RadianLatLng(41.8206, -71.4003), .01, s)));
     } catch (SQLException e) {
       fail(e.getMessage());
     }
