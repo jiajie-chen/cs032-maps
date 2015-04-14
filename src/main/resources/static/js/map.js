@@ -10,6 +10,20 @@ var requestAnimationFrame =
 	};
 
 var MapData = function() {
+	var tiles = {};
+	var TILE_SIZE = 0.10;
+
+	this.getTiles = function(sLat, sLng, eLat, eLng) {
+		var needed = {};
+		var lat = ; // snap to tile lat boundary
+		for (; lat <= eLat; lat += TILE_SIZE) {
+			var lng = Math.floor(sLng / TILE_SIZE) * TILE_SIZE; // snap to tile lng boundary
+			for (; lng <= eLng; lng == TILE_SIZE) {
+				needed[""+lat+lng]
+			}
+		}
+	};
+
 	this.setEndpoints = function(x, y) {
 
 	};
@@ -150,7 +164,7 @@ var MapDrawer = function(canvasElement, mData) {
 		this.context.lineJoin = "round";
 		this.context.moveTo(x1, y1);
 		this.context.lineTo(x2, y2);
-		this.context.strokeStyle = "#000000";
+		this.context.strokeStyle = "black";
 		this.context.lineWidth = LINE_WIDTH;
 		this.context.stroke();
 	};
@@ -205,7 +219,7 @@ var Map = function(canvasId) {
 	this.offY = drawer.canvas.offsetTop;
 
 	this.mapStreetQuery = function(sStreet, sCross, eStreet, eCross) {
-
+		this.mapData.queryIntersection(sStreet, sCross, eStreet, eCross);
 	};
 
 	this.mapScroll = function(upScroll) {

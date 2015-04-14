@@ -45,6 +45,7 @@ public class Server implements Runnable {
     Spark.post("/suggestions", new SuggestionHandler());
     Spark.post("/intersection", new IntersectionHandler());
     Spark.post("/point", new PointHandler());
+    //Spark.post("/tile", new TileHandler());
   }
 
   /**
