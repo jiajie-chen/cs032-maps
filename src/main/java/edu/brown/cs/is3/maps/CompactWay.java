@@ -4,7 +4,8 @@ import edu.brown.cs.is3.cartesian.RadianLatLng;
 
 /**
  * Compact way of representing ways for transmission by JSON. Directionality of
- * the way is not guaranteed.
+ * the way is not guaranteed. Don't take directionality into account for hashing
+ * or equals.
  * @author is3
  *
  */
