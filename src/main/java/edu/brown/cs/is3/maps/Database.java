@@ -245,7 +245,6 @@ public class Database {
           KdMapNode n = new KdMapNode(nodeId, lat, lng);
           toReturn.add(n);
         }
-
       }
     } catch (SQLException e) {
       close();
@@ -255,8 +254,6 @@ public class Database {
     return toReturn;
   }
 
-  // REWRITE THIS TO USE ONE QUERY AND JOIN
-  // MAYBE UNION TWO JOINS
   /**
    * Searches for and returns a tile containing a set of compact ways based on
    * the northwest corner with a width specified by TILE_SIZE.
@@ -299,7 +296,6 @@ public class Database {
 
           ways.add(new CompactWay(start, end));
         }
-
       }
     } catch (SQLException e) {
       close();

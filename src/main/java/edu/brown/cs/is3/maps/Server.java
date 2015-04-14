@@ -7,7 +7,9 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 
-import edu.brown.cs.is3.autocorrect.SuggestionHelper;
+import edu.brown.cs.is3.cartesian.RadianLatLng;
+import edu.brown.cs.is3.graph.Path;
+import edu.brown.cs.jc124.manager.MapsManager;
 import spark.ModelAndView;
 import spark.QueryParamsMap;
 import spark.Request;
@@ -23,15 +25,13 @@ import spark.template.freemarker.FreeMarkerEngine;
  *
  */
 public class Server implements Runnable {
-  private final Main m;
+  private final MapsManager m;
   private final int port;
   private final Gson gson = new Gson();
-  private final SuggestionHelper sh;
 
-  public Server(Main m, int port, SuggestionHelper sh) {
-    this.m = m;
+  public Server(int port, Database db) {
+    this.m = new MapsManager(db);
     this.port = port;
-    this.sh = sh;
   }
 
   @Override
@@ -40,6 +40,8 @@ public class Server implements Runnable {
     Spark.externalStaticFileLocation("src/main/resources/static");
     Spark.get("/maps", new GetHandler(), new FreeMarkerEngine());
     Spark.post("/suggestions", new SuggestionHandler());
+    Spark.post("/intersection", new IntersectionHandler());
+    Spark.post("/point", new PointHandler());
     // Spark.get("/film/m/:id", new FilmHandler(), new FreeMarkerEngine());
     // Spark.get("/actor/m/:id", new ActorHandler(), new FreeMarkerEngine());
     // Spark.post("/results", new ResultsHandler());
@@ -77,7 +79,7 @@ public class Server implements Runnable {
         String inputStart = gson.fromJson(qm.value("inputStart"), String.class);
         String[] startWords = { inputStart };
 
-        rankedStart = sh.suggest(startWords);
+        rankedStart = m.suggest(startWords);
       }
 
       String qmEnd = qm.value("inputEnd");
@@ -86,12 +88,93 @@ public class Server implements Runnable {
         String inputEnd = gson.fromJson(qm.value("inputEnd"), String.class);
         String[] endWords = { inputEnd };
 
-        rankedEnd = sh.suggest(endWords);
+        rankedEnd = m.suggest(endWords);
       }
 
       Map<String, Object> variables = new ImmutableMap.Builder<String, Object>()
           .put("startSuggestions", rankedStart)
           .put("endSuggestions", rankedEnd).build();
+
+      return gson.toJson(variables);
+    }
+  }
+
+  /**
+   * Handles requests to find paths through an intersection.
+   * @author is3
+   *
+   */
+  private class IntersectionHandler implements Route {
+
+    @Override
+    public Object handle(final Request req, final Response res) {
+      QueryParamsMap qm = req.queryMap();
+      Path toReturn;
+
+      String startStreet = qm.value("startStreet");
+      String endStreet = qm.value("endStreet");
+      String startCross = qm.value("startCross");
+      String endCross = qm.value("endCross");
+
+      System.out.println("Start: " + startStreet + " sCross: " + startCross
+          + " End: " + endStreet + " eCross: " + endCross);
+
+      if (startStreet != null && startCross != null
+          && endStreet != null && endCross != null) {
+
+        startStreet = gson.fromJson(qm.value("inputStart"), String.class);
+        startCross = gson.fromJson(qm.value("inputStart"), String.class);
+        endStreet = gson.fromJson(qm.value("inputStart"), String.class);
+        endCross = gson.fromJson(qm.value("inputStart"), String.class);
+
+        toReturn = m.getPathByIntersections(
+            startStreet, startCross, endStreet, endCross);
+      } else {
+        // TODO
+        toReturn = null;
+      }
+
+      Map<String, Object> variables = new ImmutableMap.Builder<String, Object>()
+          .put("path", toReturn).build();
+
+      return gson.toJson(variables);
+    }
+  }
+
+  /**
+   * Handles requests to find paths through an intersection.
+   * @author is3
+   *
+   */
+  private class PointHandler implements Route {
+
+    @Override
+    public Object handle(final Request req, final Response res) {
+      QueryParamsMap qm = req.queryMap();
+      Path toReturn;
+
+      String start = qm.value("start");
+      String end = qm.value("end");
+
+      System.out.println("Start: " + start + " End: " + end);
+
+      if (start != null && end != null) {
+
+        RadianLatLng startPoint =
+            gson.fromJson(qm.value("inputStart"), RadianLatLng.class);
+        RadianLatLng endPoint =
+            gson.fromJson(qm.value("inputStart"), RadianLatLng.class);
+
+        toReturn = m.getPathByPoints(
+            startPoint.getLat(), startPoint.getLng(),
+            endPoint.getLat(), endPoint.getLng());
+      } else {
+        // TODO
+        toReturn = null;
+      }
+
+      Map<String, Object> variables = new ImmutableMap.Builder<String, Object>()
+          .put("path", toReturn).build();
 
       return gson.toJson(variables);
     }

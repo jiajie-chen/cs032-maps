@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.List;
 
-import edu.brown.cs.is3.autocorrect.SuggestionHelper;
 import edu.brown.cs.is3.graph.Path;
 import edu.brown.cs.jc124.manager.MapsManager;
 
@@ -23,6 +22,8 @@ import joptsimple.OptionSpec;
 
 // MAYBE MAKE RADIANLATLNG EXTEND SIMPLE LAT LNG FOR CONVENIENCE
 // DO TONS OF TESTING AND OPTIMIZATION
+
+// DO TESTING, COMMENTING, STYLE, TRAFFIC, DRAWING
 
 /**
  * Main class implementing maps, including shortest path searches, auto
@@ -143,8 +144,8 @@ public class Main implements Runnable {
 
     try {
       manager = new MapsManager(db);
-    } catch (RuntimeException e1) {
-      System.err.println("ERROR: " + e1.getMessage());
+    } catch (RuntimeException e) {
+      System.err.println("ERROR: " + e.getMessage());
       return;
     }
 
@@ -232,17 +233,14 @@ public class Main implements Runnable {
    * Luanches a spark server to allow for GUI querying of maps.
    */
   private void runSparkServer() {
-    SuggestionHelper sh = new SuggestionHelper();
-
     try {
-      sh.fill(db);
+      Server s = new Server(sparkPort, db);
+      s.run();
+      db.close();
     } catch (RuntimeException e) {
-      System.err.println("ERROR: " + e.getMessage());
+      System.err.println(e.getMessage());
       db.close();
       return;
     }
-
-    Server s = new Server(this, sparkPort, sh);
-    s.run();
   }
 }
