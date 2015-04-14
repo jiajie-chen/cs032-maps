@@ -307,6 +307,11 @@ public class Database {
     return toReturn;
   }
 
+  /**
+   * Generates the coordinate object for a node given its id.
+   * @param id of node to look for.
+   * @return position object for that node.
+   */
   public RadianLatLng coordinatesOfId(String id) {
     if (nodeById.get(id) != null) {
       return nodeById.get(id).getPos();

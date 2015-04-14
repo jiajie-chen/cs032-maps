@@ -14,12 +14,12 @@ import edu.brown.cs.is3.maps.Node;
  *         and closest-point)
  */
 public class MapsManager {
-  private Database db;
-  private SuggestionHelper autocorrect;
-  private KdTreeHelper mapsKd;
+  private final Database db;
+  private final SuggestionHelper autocorrect;
+  private final KdTreeHelper mapsKd;
 
   /**
-   * @param db
+   * @param db to fill components from.
    */
   public MapsManager(Database db) {
     this.db = db;
@@ -31,6 +31,13 @@ public class MapsManager {
     mapsKd.fill(db);
   }
 
+  /**
+   * Returns the shortest path between two points based on a database.
+   * @param start point.
+   * @param end point.
+   * @return list of ways as a path along the shortest path between the points
+   *         or a path with a null list of ways if no path exists.
+   */
   private Path getShortestPath(Node start, Node end) {
     Graph g = new Graph(db);
 
@@ -49,11 +56,13 @@ public class MapsManager {
   }
 
   /**
-   * @param startStreet
-   * @param startCross
-   * @param endStreet
-   * @param endCross
-   * @return
+   * @param startStreet start corner.
+   * @param startCross other start corner.
+   * @param endStreet end corner.
+   * @param endCross other end corner.
+   * @return list of ways as a path along the shortest path between the
+   *         intersection of the two streets or a path with a null list of ways
+   *         if no path exists.
    */
   public Path getPathByIntersections(String startStreet, String startCross,
       String endStreet, String endCross) {

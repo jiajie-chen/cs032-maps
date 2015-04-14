@@ -10,7 +10,7 @@ import edu.brown.cs.is3.maps.Way;
  * @author jchen Represents a path from a start node to end node, by ways, in a
  *         map graph.
  */
-public class Path {
+public class Path { // SHOULD MAYBE USE COMPACT WAYS
   private Node start, end;
   private List<Way> path;
 

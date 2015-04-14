@@ -7,13 +7,22 @@ import edu.brown.cs.is3.cartesian.RadianLatLng;
  *         KD tree.
  */
 public class KdMapNode extends RadianLatLng {
-  private String nodeId;
+  private final String nodeId;
 
+  /**
+   * Builds a kd map node.
+   * @param nodeId id of node in database.
+   * @param lat of node.
+   * @param lng of node.
+   */
   public KdMapNode(String nodeId, Double lat, Double lng) {
     super(lat, lng);
     this.nodeId = nodeId;
   }
 
+  /**
+   * @return id of the node.
+   */
   public String getId() {
     return this.nodeId;
   }

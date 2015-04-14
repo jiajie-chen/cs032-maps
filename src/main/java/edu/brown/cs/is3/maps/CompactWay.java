@@ -10,4 +10,18 @@ public class CompactWay {
     this.start = start;
     this.end = end;
   }
+
+  /**
+   * @return the end position of this way.
+   */
+  public RadianLatLng getStart() {
+    return this.start;
+  }
+
+  /**
+   * @return the start position of this way.
+   */
+  public RadianLatLng getEnd() {
+    return this.end;
+  }
 }

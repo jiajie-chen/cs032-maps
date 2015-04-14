@@ -18,12 +18,11 @@ import edu.brown.cs.is3.trie.Trie;
  */
 public class SuggestionHelper {
   private static final int MAX_SUGGESTIONS = 5;
-  
+
   private Trie dict;
   private Map<String, Integer> unifreqs;
   private Map<String, Integer> bifreqs;
-  
-  
+
   /**
    * Makes a suggestion helper with no data loaded.
    */
@@ -49,8 +48,8 @@ public class SuggestionHelper {
   /**
    * Given a list of words, returns the auto correction suggestions
    *
-   * @param words
-   * @return
+   * @param words array to correct.
+   * @return list of suggestions for what the user might have meant by words.
    */
   public List<String> suggest(String[] words) {
     if (words.length == 0) {
