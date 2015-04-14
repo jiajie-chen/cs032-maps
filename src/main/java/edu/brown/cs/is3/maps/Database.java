@@ -253,7 +253,6 @@ public class Database {
     return toReturn;
   }
 
-  // DOUBLE CHECK THIS GETS EVERYTHING AHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
   /**
    * Searches for and returns a tile containing a set of compact ways based on
    * the northwest corner with a width specified by TILE_SIZE. Assumes there can
@@ -274,16 +273,22 @@ public class Database {
     double right = left + width;
 
     Set<CompactWay> ways = new HashSet<>();
-    String wayQuery = "SELECT s.latitude, s.longitude, w.end "
-        + "FROM way AS w INNER JOIN node AS s ON w.start = s.id "
-        + "WHERE (s.latitude <= ? AND s.latitude >= ? "
-        + "AND s.longitude >= ? AND s.longitude <= ?);";
 
+    String wayQuery = " SELECT s.latitude, s.longitude, w.end "
+        + "FROM way AS w INNER JOIN node AS s ON w.start = s.id "
+        + "WHERE  (s.latitude <= ? AND s.latitude >= ? "
+        + "AND s.longitude >= ? AND s.longitude <= ?) "
+        + "UNION SELECT e.latitude, e.longitude, w.start "
+        + "FROM way AS w INNER JOIN node AS e ON w.end = e.id "
+        + "WHERE (e.latitude <= ? AND e.latitude >= ? "
+        + "AND e.longitude >= ? AND e.longitude <= ?);";
     try (PreparedStatement wayPS = conn.prepareStatement(wayQuery)) {
-      wayPS.setDouble(1, top);
-      wayPS.setDouble(2, bot);
-      wayPS.setDouble(3, left);
-      wayPS.setDouble(4, right);
+      for (int i = 0; i < 8; i += 4) {
+        wayPS.setDouble(i + 1, top);
+        wayPS.setDouble(i + 2, bot);
+        wayPS.setDouble(i + 3, left);
+        wayPS.setDouble(i + 4, right);
+      }
 
       try (ResultSet wayRS = wayPS.executeQuery()) {
 

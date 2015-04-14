@@ -55,6 +55,6 @@ public class CompactWay {
   @Override
   public int hashCode() {
     return (Double.hashCode(start.getLat()) ^ Double.hashCode(end.getLat()))
-        * 17 * (Double.hashCode(end.getLng()) ^ Double.hashCode(end.getLng()));
+        ^ (Double.hashCode(start.getLng()) ^ Double.hashCode(end.getLng()));
   }
 }

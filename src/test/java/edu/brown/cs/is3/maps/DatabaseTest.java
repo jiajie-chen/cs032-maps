@@ -268,12 +268,17 @@ public class DatabaseTest {
       s.add(new CompactWay(cords[3], cords[4]));
       s.add(new CompactWay(cords[1], cords[2]));
       s.add(new CompactWay(cords[4], cords[5]));
-      assertTrue(six.equals(
-          new Tile(new RadianLatLng(41.8203, -71.4003), .0003, s)));
+      assertTrue(six.equals(new Tile(cords[4], .0003, s)));
 
       s.add(new CompactWay(cords[2], cords[5]));
       assertTrue(all.equals(
           new Tile(new RadianLatLng(41.8206, -71.4003), .01, s)));
+
+      Tile ends = db.tileOfCorner(cords[2], 0);
+      Set<CompactWay> st = new HashSet<>();
+      st.add(new CompactWay(cords[1], cords[2]));
+      st.add(new CompactWay(cords[2], cords[5]));
+      assertTrue(ends.equals(new Tile(cords[2], 0, st)));
     } catch (SQLException e) {
       fail(e.getMessage());
     }
