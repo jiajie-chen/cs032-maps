@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -16,10 +15,10 @@ public class TrafficManager implements Runnable {
   private static final String BASE_URL = "http://localhost";
   private static final long MS_DELAY = 250;
 
-  public TrafficManager(int serverPort) {
+  public TrafficManager(int serverPort, Map<String, Double> traffic) {
     this.serverPort = serverPort;
     this.unixTime = 0;
-    this.trafficById = new HashMap<>();
+    this.trafficById = traffic;
 
     try {
       URL query = new URL(BASE_URL + ":" + serverPort + "?last=" + unixTime);
@@ -30,9 +29,11 @@ public class TrafficManager implements Runnable {
 
         String s = r.readLine();
         while (s != null) {
-          System.out.println(s);
+          TrafficParser tp = new TrafficParser(s);
+          Map<String, Double> changes = tp.parse();
+          trafficById.putAll(changes); // TODO
+
           s = r.readLine();
-          // TODO
         }
 
       }
@@ -61,17 +62,19 @@ public class TrafficManager implements Runnable {
 
           String s = r.readLine();
           while (s != null) {
-            System.out.println(s);
+            TrafficParser tp = new TrafficParser(s);
+            Map<String, Double> changes = tp.parse();
+            trafficById.putAll(changes); // TODO
+
             s = r.readLine();
-            // TODO
           }
         }
       } catch (IOException e) {
         System.err
             .println("ERROR: Traffic parsing failed with " + e.getMessage());
         return;
+
       }
     }
-
   }
 }

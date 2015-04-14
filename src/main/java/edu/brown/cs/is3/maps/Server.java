@@ -28,11 +28,13 @@ public class Server implements Runnable {
   private final MapsManager m;
   private final int port;
   private final Gson gson = new Gson();
+  private final Map<String, Double> traffic;
   private static final double TILE_SIZE = .01;
 
-  public Server(int port, Database db) {
+  public Server(int port, Database db, Map<String, Double> traffic) {
     this.m = new MapsManager(db);
     this.port = port;
+    this.traffic = traffic;
   }
 
   @Override

@@ -5,9 +5,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import edu.brown.cs.is3.graph.Path;
 import edu.brown.cs.jc124.manager.MapsManager;
+import edu.brown.cs.jc124.traffic.TrafficManager;
 
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
@@ -36,10 +39,12 @@ import joptsimple.OptionSpec;
 public class Main implements Runnable {
   private final String[] args;
   private int sparkPort;
+  private int trafficPort;
   private Database db;
   private MapsManager manager;
 
   private static final int DEFAULT_PORT = 3141;
+  private static final int DEFAULT_TRAFFIC = 3142;
   private static final int EXPECTED_ARGS = 4;
 
   /**
@@ -64,7 +69,8 @@ public class Main implements Runnable {
    * Prints program usage for CLI.
    */
   private static void printUsage() {
-    System.err.println("ERROR: Usage: ./run [--gui] [--port <int>] <db>");
+    System.err.println(
+        "ERROR: Usage: ./run [--gui] [--port <int>] [--tport <int>] <db>");
   }
 
   /**
@@ -117,6 +123,8 @@ public class Main implements Runnable {
     parser.accepts("gui");
     parser.accepts("port").withRequiredArg().ofType(Integer.class)
         .defaultsTo(DEFAULT_PORT);
+    parser.accepts("tport").withRequiredArg().ofType(Integer.class)
+        .defaultsTo(DEFAULT_TRAFFIC);
     OptionSpec<String> dbSpec = parser.nonOptions().ofType(String.class);
 
     OptionSet options;
@@ -125,6 +133,7 @@ public class Main implements Runnable {
     try {
       options = parser.parse(args);
       sparkPort = (int) options.valueOf("port");
+      trafficPort = (int) options.valueOf("tport");
       dbPath = options.valueOf(dbSpec);
     } catch (OptionException e) {
       printUsage();
@@ -235,7 +244,12 @@ public class Main implements Runnable {
    */
   private void runSparkServer() {
     try {
-      Server s = new Server(sparkPort, db);
+      Map<String, Double> traffic = new ConcurrentHashMap();
+
+      Thread t = new Thread(new TrafficManager(trafficPort, traffic));
+      t.start();
+
+      Server s = new Server(sparkPort, db, traffic);
       s.run();
       db.close();
     } catch (RuntimeException e) {
