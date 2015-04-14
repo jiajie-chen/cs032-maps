@@ -17,8 +17,8 @@ public class Node {
 
   /**
    * Builds a node from an id and a pos.
-   * @param id of node;
-   * @param pos of node;
+   * @param id of node.
+   * @param pos of node.
    */
   public Node(String id, RadianLatLng pos) {
     this.id = id;

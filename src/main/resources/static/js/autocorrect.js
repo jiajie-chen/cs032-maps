@@ -17,19 +17,18 @@ var Autocorrect = function(inputID, listID) {
 		return;
 	}
 
-	var _this = this; // for functions calls outside of this object (like in event handlers)
-    this.inputElement.addEventListener("keyup", function(event) {
-		var text = this.value;
+    this.inputElement.addEventListener("keyup", $.proxy(function(event) {
+		var text = this.inputElement.value;
 
 		var postParameters = {inputStart: JSON.stringify(text)};
 		console.log(postParameters);
 
-		$.post("/suggestions", postParameters, function(responseJSON) {
+		$.post("/suggestions", postParameters, $.proxy(function(responseJSON) {
 			console.log("Received suggestions: " + responseJSON);
 			responseObject = JSON.parse(responseJSON);
 			var suggestionsList = responseObject.startSuggestions;
 
-			_this.displaySuggestions(suggestionsList);
-		});
-	});
-}
+			this.displaySuggestions(suggestionsList);
+		}, this));
+	}, this));
+};
