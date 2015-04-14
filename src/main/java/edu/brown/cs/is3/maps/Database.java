@@ -25,7 +25,7 @@ public class Database {
   private final Map<String, Way> wayById = new HashMap<>();
   private final Map<String, Node> nodeById = new HashMap<>();
   private final Map<RadianLatLng, Tile> tileByCorner = new HashMap<>();
-  private static final double TILE_SIZE = .1;
+  private static final double TILE_SIZE = .01;
 
   /**
    * Constructs a db.
@@ -265,6 +265,7 @@ public class Database {
    */
   public Tile tileOfCorner(RadianLatLng nw) {
     Tile toReturn;
+
     double top = nw.getLat();
     double bot = top - TILE_SIZE;
     double left = nw.getLng();
@@ -275,35 +276,26 @@ public class Database {
     }
 
     Set<CompactWay> ways = new HashSet<>();
-    String wayQuery = "SELECT s.latitude, s.longitude, e.latitude, e.longitude "
+    String wayQuery = "SELECT s.latitude, s.longitude, w.end "
         + "FROM way AS w INNER JOIN node AS s ON w.start = s.id "
-        + "INNER JOIN e ON w.end = e.id "
-        + "WHERE (e.latitude < ? AND e.latitude > ? "
-        + "AND e.longitude > ? AND e.longitude < ?) "
-        + "OR (s.latitude < ? AND s.latitude > ? "
+        + "WHERE (s.latitude < ? AND s.latitude > ? "
         + "AND s.longitude > ? AND s.longitude < ?);";
 
     try (PreparedStatement wayPS = conn.prepareStatement(wayQuery)) {
-      for (int i = 0; i < 2; i++) {
-        wayPS.setDouble(i + 1, top);
-        wayPS.setDouble(i + 2, bot);
-        wayPS.setDouble(i + 3, left);
-        wayPS.setDouble(i + 4, right);
-      }
+      wayPS.setDouble(1, top);
+      wayPS.setDouble(2, bot);
+      wayPS.setDouble(3, left);
+      wayPS.setDouble(4, right);
 
       try (ResultSet wayRS = wayPS.executeQuery()) {
 
         while (wayRS.next()) {
 
-          boolean first = wayRS.next();
           RadianLatLng start = new RadianLatLng(
               Double.parseDouble(wayRS.getString(1)),
               Double.parseDouble(wayRS.getString(2)));
 
-          boolean second = wayRS.next();
-          RadianLatLng end = new RadianLatLng(
-              Double.parseDouble(wayRS.getString(3)),
-              Double.parseDouble(wayRS.getString(4)));
+          RadianLatLng end = coordinatesOfId(wayRS.getString(3));
 
           ways.add(new CompactWay(start, end));
         }
@@ -317,5 +309,35 @@ public class Database {
     toReturn = new Tile(nw, TILE_SIZE, ways);
     tileByCorner.put(nw, toReturn);
     return toReturn;
+  }
+
+  public RadianLatLng coordinatesOfId(String id) {
+    if (nodeById.get(id) != null) {
+      return nodeById.get(id).getPos();
+    }
+
+    String nodeQuery = "SELECT node.latitude, node.longitude FROM node WHERE node.id = ?;";
+
+    try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery)) {
+      nodePS.setString(1, id);
+
+      try (ResultSet nodeRS = nodePS.executeQuery()) {
+        Double lat;
+        Double lng;
+
+        if (nodeRS.next()) {
+          lat = Double.parseDouble(nodeRS.getString(2));
+          lng = Double.parseDouble(nodeRS.getString(3));
+        } else {
+          close();
+          throw new RuntimeException("No node with that id.");
+        }
+
+        return new RadianLatLng(lat, lng);
+      }
+    } catch (SQLException e) {
+      close();
+      throw new RuntimeException(e);
+    }
   }
 }
