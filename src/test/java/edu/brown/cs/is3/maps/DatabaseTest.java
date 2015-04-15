@@ -77,10 +77,11 @@ public class DatabaseTest {
       Node n = db.nodeOfId("/n/1");
 
       assertTrue(one.equals(n) && one.getPos().equals(n.getPos()));
-      assertTrue(n.getWayIDs().equals(Sets.newHashSet("/w/3", "/w/1")));
+      assertTrue(db.waysOfNode(n).equals(
+          Sets.newHashSet(db.wayOfId("/w/3"), db.wayOfId("/w/1"))));
 
       Node m = db.nodeOfId("/n/5");
-      assertTrue(m.getWayIDs().equals(new HashSet<>()));
+      assertTrue(m.getWays().equals(new HashSet<>()));
 
       db.close();
 
