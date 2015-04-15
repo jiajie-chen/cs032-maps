@@ -1,13 +1,16 @@
 package edu.brown.cs.is3.maps;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import edu.brown.cs.is3.cartesian.RadianLatLng;
+import edu.brown.cs.is3.cartesian.Tile;
 import edu.brown.cs.is3.graph.Path;
 import edu.brown.cs.jc124.manager.MapsManager;
 import spark.ModelAndView;
@@ -49,12 +52,12 @@ public class Server implements Runnable {
     Spark.post("/suggestions", new SuggestionHandler());
     Spark.post("/intersection", new IntersectionHandler());
     Spark.post("/point", new PointHandler());
-    // Spark.post("/tile", new TileHandler());
+    Spark.post("/tile", new TileHandler());
     // Spark.get("/traffic", new GetHandler(), new FreeMarkerEngine());
     Spark.post("/changes", new ChangesHandler());
   }
 
-  /**
+  /**is3
    * Handles requests for the main web page at /maps.
    * @author is3
    *
@@ -187,6 +190,35 @@ public class Server implements Runnable {
 
       Map<String, Object> variables = new ImmutableMap.Builder<String, Object>()
           .put("path", toReturn).build();
+
+      return gson.toJson(variables);
+    }
+  }
+  
+  /**
+   * Handles tile requests for map display.
+   * @author is3
+   *
+   */
+  private class TileHandler implements Route {
+
+    @Override
+    public Object handle(final Request req, final Response res) {
+      QueryParamsMap qm = req.queryMap();
+      String jsonTiles = qm.value("tiles");
+      
+      Type listType = new TypeToken<ArrayList<RadianLatLng>>() {} .getType();
+      List<RadianLatLng> nwCorners = new Gson().fromJson(jsonTiles, listType);
+      
+      ImmutableMap.Builder<String, Tile> tiles = new ImmutableMap.Builder<String, Tile>();
+      for (RadianLatLng c : nwCorners) {
+        String tID = c.getLat() + ":" + c.getLng();
+        tiles.put(tID, m.getTile(c, TILE_SIZE));
+      }
+      Map<String, Tile> toSend = tiles.build();
+      
+      Map<String, Object> variables = new ImmutableMap.Builder<String, Object>()
+          .put("tiles", toSend).build();
 
       return gson.toJson(variables);
     }

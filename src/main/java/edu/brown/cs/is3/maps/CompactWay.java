@@ -10,12 +10,20 @@ import edu.brown.cs.is3.cartesian.RadianLatLng;
  *
  */
 public class CompactWay {
+  private final String id;
   private final RadianLatLng start;
   private final RadianLatLng end;
 
+  public CompactWay(RadianLatLng start, RadianLatLng end, String id) {
+    this.start = start;
+    this.end = end;
+    this.id = id;
+  }
+  
   public CompactWay(RadianLatLng start, RadianLatLng end) {
     this.start = start;
     this.end = end;
+    this.id = "";
   }
 
   /**

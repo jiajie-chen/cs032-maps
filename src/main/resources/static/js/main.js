@@ -13,6 +13,9 @@
     var scb = new Autocorrect("sCross", "sCrossList");
     var ecb = new Autocorrect("eCross", "eCrossList");
   //*/
+    console.log("Map started!");
+    var map = new Map("mapCanvas");
+
 
   /*
     sb.addEventListener("keyup", function(event) {
