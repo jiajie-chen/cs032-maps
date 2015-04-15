@@ -48,7 +48,7 @@ public class Server implements Runnable {
   public Server(int port, Database db,
       Map<String, Double> traffic, Map<String, Double> changes) {
 
-    this.m = new MapsManager(db);
+    this.m = new MapsManager(db, true);
     this.port = port;
     this.traffic = traffic;
     this.changes = changes;

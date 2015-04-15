@@ -13,6 +13,7 @@ import edu.brown.cs.is3.maps.Node;
 import edu.brown.cs.is3.maps.Way;
 
 // should probably be using squared distances!!!!!!!!!!!!!!!!!!!!!!!!!
+// LOOK AT PATH BUILDING
 /**
  * Implementation of graph and a star search for ways and nodes.
  * @author is3
@@ -53,7 +54,7 @@ public class Graph {
    * @return path with the shortest set of ways or null list if no path exists.
    */
   public Path dijkstras(Node start, Node end) {
-    if (start.equals(end)) {
+    if (start.equals(end)) { // MAYBE CHANGE HOW THIS IS HANDLED
       throw new RuntimeException("Those are the same node, silly!");
     }
 
@@ -89,11 +90,15 @@ public class Graph {
 
         if (!closed.contains(next)) {
           double nextDist = currDistance + curr.getDistance(next); // g
-          double nextTotal = nextDist + next.getDistance(end); // f
+          double oldNextDist =
+              distances.getOrDefault(next, Double.MAX_VALUE); // old g
 
-          distances.put(next, nextDist);
-          open.add(new WeightedNode(next, nextTotal));
-          parents.put(next, w);
+          if (nextDist < oldNextDist) {
+            double nextTotal = nextDist + next.getDistance(end); // f
+            distances.put(next, nextDist);
+            open.add(new WeightedNode(next, nextTotal));
+            parents.put(next, w);
+          }
         }
       }
     }
@@ -111,6 +116,7 @@ public class Graph {
    * @return path with the shortest set of ways or null list if no path exists.
    */
   private Path trafficDijkstras(Node start, Node end) {
+    throw new RuntimeException("NYI");
     // Map<Node, Double> distances = new HashMap<>(); // the distances list (g)
     // PriorityQueue<Node> open = new PriorityQueue<>(
     // new DistanceToComparator(end, distances)); // the open list (by f)
@@ -143,7 +149,7 @@ public class Graph {
     // }
     // }
 
-    return new Path(start, end); // path with no ways
+    // return new Path(start, end); // path with no ways
   }
 
   /**

@@ -24,11 +24,15 @@ public class MapsManager {
   /**
    * @param db to fill components from.
    */
-  public MapsManager(Database db) {
+  public MapsManager(Database db, boolean gui) {
     this.db = db;
 
-    autocorrect = new SuggestionHelper();
-    autocorrect.fill(db);
+    if (gui) {
+      autocorrect = new SuggestionHelper();
+      autocorrect.fill(db);
+    } else {
+      autocorrect = null;
+    }
 
     mapsKd = new KdTreeHelper();
     mapsKd.fill(db);
