@@ -4,10 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import edu.brown.cs.is3.command.Command;
+import edu.brown.cs.is3.command.ReplParser;
 import edu.brown.cs.is3.graph.Path;
 import edu.brown.cs.jc124.manager.MapsManager;
 import edu.brown.cs.jc124.traffic.TrafficManager;
@@ -30,6 +31,7 @@ import joptsimple.OptionSpec;
 
 // TEST PARSING, ISDOUBLE, DB, SYSTEM
 // INCLUDE MULTIPLE COMMAND, SERVER, AND LAT LNG BASED TESTING!
+// SLOW TESTER MAYBE?
 
 /**
  * Main class implementing maps, including shortest path searches, auto
@@ -88,39 +90,6 @@ public class Main implements Runnable {
         + "<lat1> <lon1> <lat2> <lon2> OR "
         + "<\"Street 1\"> <\"Cross Street 1\"> "
         + "<\"Street 2\"> <\"Cross Street 2\">");
-  }
-
-  /**
-   * Checks if a list of strings contains doubles.
-   * @param strings to check.
-   * @return true if all strings are doubles and false otherwise.
-   */
-  private static boolean containsDoubles(List<String> strings) {
-    for (String s : strings) {
-      if (!isDouble(s)) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  /**
-   * Checks if an individual string is a finite double.
-   * @param value to check.
-   * @return true if is a double and false otherwise.
-   */
-  private static boolean isDouble(String value) {
-    try {
-      double d = Double.parseDouble(value);
-      if (!Double.isFinite(d)) {
-        return false;
-      }
-
-      return true;
-    } catch (NumberFormatException e) {
-      return false;
-    }
   }
 
   @Override
@@ -189,56 +158,10 @@ public class Main implements Runnable {
     String s = r.readLine();
 
     while (s != null && s.length() != 0) {
-      OptionParser parser = new OptionParser();
-      OptionSpec<String> argsSpec = parser.nonOptions().ofType(String.class);
-      OptionSet options;
+      Command c = new ReplParser(s).parse();
+      Path p = c.run(manager);
 
-      try { // maybe needs checks for "" or regexes somewhere!!!!!!!
-        options = parser.parse(s.split("[ ]+(?=([^\"]*\"[^\"]*\")*[^\"]*$)"));
-      } catch (OptionException e) {
-        printREPLUsage();
-        db.close();
-        return;
-      }
-
-      List<String> argsList;
-
-      try {
-        argsList = options.valuesOf(argsSpec);
-      } catch (OptionException e) {
-        printREPLUsage();
-        db.close();
-        return;
-      }
-
-      if (argsList.size() != EXPECTED_ARGS) {
-        printREPLUsage();
-        db.close();
-        return;
-      } else {
-        Path path = null;
-
-        if (containsDoubles(argsList)) {
-          Double lat1 = Double.parseDouble(argsList.get(ZEROETH));
-          Double lng1 = Double.parseDouble(argsList.get(FIRST));
-
-          Double lat2 = Double.parseDouble(argsList.get(SECOND));
-          Double lng2 = Double.parseDouble(argsList.get(THIRD));
-
-          path = manager.getPathByPoints(lat1, lng1, lat2, lng2);
-        } else { // maybe needs checks for "" or regexes somewhere!!!!!!!
-          String startStreet = argsList.get(ZEROETH).replace("\"", "");
-          String startCross = argsList.get(FIRST).replace("\"", "");
-
-          String endStreet = argsList.get(SECOND).replace("\"", "");
-          String endCross = argsList.get(THIRD).replace("\"", "");
-
-          path = manager.getPathByIntersections(startStreet, startCross,
-              endStreet, endCross);
-        }
-
-        System.out.println(path);
-      }
+      System.out.println(p);
 
       s = r.readLine();
     }
