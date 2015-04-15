@@ -24,6 +24,7 @@ public class Database {
   private final Connection conn;
   private final Map<String, Way> wayById = new HashMap<>();
   private final Map<String, Node> nodeById = new HashMap<>();
+  private final Map<Node, Way> wayByNode = new HashMap<>();
   private final Map<RadianLatLng, Tile> tileByCorner = new HashMap<>();
 
   /**
