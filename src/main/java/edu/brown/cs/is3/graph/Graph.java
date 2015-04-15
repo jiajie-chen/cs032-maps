@@ -111,6 +111,7 @@ public class Graph {
    * @return path with the shortest set of ways or null list if no path exists.
    */
   private Path trafficDijkstras(Node start, Node end) {
+    throw new RuntimeException("NYI");
     // Map<Node, Double> distances = new HashMap<>(); // the distances list (g)
     // PriorityQueue<Node> open = new PriorityQueue<>(
     // new DistanceToComparator(end, distances)); // the open list (by f)
@@ -143,7 +144,7 @@ public class Graph {
     // }
     // }
 
-    return new Path(start, end); // path with no ways
+    // return new Path(start, end); // path with no ways
   }
 
   /**

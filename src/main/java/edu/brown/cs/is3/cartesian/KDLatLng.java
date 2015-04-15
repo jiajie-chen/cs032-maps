@@ -4,6 +4,11 @@ import com.javadocmd.simplelatlng.LatLng;
 
 import edu.brown.cs.jc124.kdtree.Coordinate;
 
+/**
+ * Implementation of SimpleLatLng that is compatible with KDTrees.
+ * @author is3
+ *
+ */
 public class KDLatLng extends LatLng implements Coordinate {
   /**
    * Auto generated serial number.
@@ -15,6 +20,11 @@ public class KDLatLng extends LatLng implements Coordinate {
   public static final int LAT_AXIS = 0;
   public static final int LNG_AXIS = 1;
 
+  /**
+   * Builds a KDLatLng
+   * @param latitude of pos.
+   * @param longitude of pos.
+   */
   public KDLatLng(double latitude, double longitude) {
     super(latitude, longitude);
   }
