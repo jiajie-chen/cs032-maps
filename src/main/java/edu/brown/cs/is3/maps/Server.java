@@ -162,14 +162,14 @@ public class Server implements Runnable {
 
       String sLat = qm.value("startLat");
       String eLat = qm.value("endLat");
-      String startCross = qm.value("startLng");
-      String endCross = qm.value("endLng");
+      String sLng = qm.value("startLng");
+      String eLng = qm.value("endLng");
 
-      System.out.println("Start[ Lat: " + sLat + " Lng: " + startCross
-          + "] End[ Lat: " + eLat + " Lng: " + endCross + "]");
+      System.out.println("Start[ Lat: " + sLat + " Lng: " + sLng
+          + "] End[ Lat: " + eLat + " Lng: " + eLng + "]");
 
-      if (sLat != null && startCross != null
-          && eLat != null && endCross != null) {
+      if (sLat != null && sLng != null
+          && eLat != null && eLng != null) {
         
         double startLat = gson.fromJson(qm.value("startLat"), Double.class);
         double startLng = gson.fromJson(qm.value("startLng"), Double.class);
