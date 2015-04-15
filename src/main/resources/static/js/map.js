@@ -9,84 +9,76 @@ var requestAnimationFrame =
 	    return setTimeout(callback, 16);
 	};
 
+var toRad = Math.PI / 180;
+
 var MapData = function() {
-	var tiles = {};
+	this.tiles = {};
 	var TILE_SIZE = 0.10;
 
 	this.queryTiles = function(tileNWs) {
-		var postParameters = {};
+		var postParameters = {tiles: JSON.stringify(tileNWs)};
+		console.log(postParameters);
 
-		var results;
 		$.post("/tile", postParameters, function(responseJSON) {
 			console.log("Received tiles: " + responseJSON);
-			results = JSON.parse(responseJSON);
-		});
-
-		for (var i = 0; i < results.length; i++) {
-		}
+			var results = JSON.parse(responseJSON);
+			if (results) {
+				var newTiles = results.tiles;
+				for (ids in newTiles) {
+					this.tiles[ids] = newTiles[ids].ways;
+				}
+			}
+		}.bind(this));
 	};
 
-	var path = undefined;
+	this.pathIDs = new Array();
 	// var querySuccess = false;
+
+	this.queryPath = function(url, params) {
+		var results;
+		$.post(url, params, function(responseJSON) {
+			console.log("Received path: " + responseJSON);
+			results = JSON.parse(responseJSON);
+			if (results) {
+				this.pathIDs = new Array();
+				var path = results.path;
+				if (path && path.path) {
+					var ways = path.path;
+					for (var i = 0; i < ways.length; i++) {
+						var w = ways[i];
+						this.pathIDs.push(w.id);
+					}
+				}
+			}
+		}.bind(this));
+	};
 
 	this.queryIntersection = function(sStreet, sCross, eStreet, eCross) {
 		var postParameters = {
-			startStreet: sStreet,
-			startCross: sCross,
-			endStreet: eStreet,
-			endCross: sCross
+			startStreet: JSON.stringify(sStreet),
+			startCross: JSON.stringify(sCross),
+			endStreet: JSON.stringify(eStreet),
+			endCross: JSON.stringify(sCross)
 		};
 
-		var results;
-		$.post("/intersection", postParameters, function(responseJSON) {
-			console.log("Received path: " + responseJSON);
-			results = JSON.parse(responseJSON);
-		});
-		path = results.path;
+		this.queryPath("/intersection", postParameters);
 	};
 
 	this.queryPoint = function(sLat, sLng, eLat, eLng) {
 		var postParameters = {
-			startLat: sLat,
-			startLng: sLng,
-			endLat: eLat,
-			endLng: eLng
+			startLat: JSON.stringify(sLat),
+			startLng: JSON.stringify(sLng),
+			endLat: JSON.stringify(eLat),
+			endLng: JSON.stringify(eLng)
 		};
 
-		var results;
-		$.post("/point", postParameters, function(responseJSON) {
-			console.log("Received path: " + responseJSON);
-			results = JSON.parse(responseJSON);
-		});
-		path = results.path;
+		this.queryPath("/point", postParameters);
 	};
+
+	var trafficIDs = {};
 
 	this.queryTraffic = function() {
 
-	};
-
-	this.getTiles = function(sLat, sLng, eLat, eLng) {
-		// init needed tiles by going through all tiles in bounding box and seeing if cached
-		var needed = new Array();
-		var toReturn = new Array();
-		var lat = Math.ceil(sLat / TILE_SIZE) * TILE_SIZE; // snap to tile lat boundary
-		for (; lat < eLat; lat += TILE_SIZE) {
-			var lng = Math.floor(sLng / TILE_SIZE) * TILE_SIZE; // snap to tile lng boundary
-			for (; lng < eLng; lng += TILE_SIZE) {
-				var key = lat + ":" + lng;
-
-				// not already in cache
-				if (!(key in tiles)) {
-					needed.push({lat:lat, lng:lng});
-				}
-
-				toReturn.push(key); // add id to returned array
-			}
-		}
-
-		// query and cache needed tiles
-		this.queryTiles(needed);
-		return toReturn;
 	};
 
 	var currEnd = 0;
@@ -100,7 +92,7 @@ var MapData = function() {
 			currEnd = 1;
 
 			// reset path
-			path = undefined;
+			this.pathIDs = new Array();
 		} else {
 			endPoint.lat = lat;
 			endPoint.lng = lng;
@@ -119,23 +111,69 @@ var MapData = function() {
 		}
 	};
 
+	this.getTiles = function(sLat, sLng, eLat, eLng) {
+		// init needed tiles by going through all tiles in bounding box and seeing if cached
+		var needed = new Array();
+		var toReturn = new Array();
+		var lat = Math.ceil(sLat / TILE_SIZE) * TILE_SIZE; // snap to tile lat boundary
+		for (; lat > eLat; lat -= TILE_SIZE) {
+			var lng = Math.floor(sLng / TILE_SIZE) * TILE_SIZE; // snap to tile lng boundary
+			for (; lng < eLng; lng += TILE_SIZE) {
+				var key = lat + ":" + lng;
+
+				// not already in cache
+				if (!(key in this.tiles)) {
+					needed.push({lat:lat, lng:lng});
+				}
+
+				toReturn.push(key); // add id to returned array
+			}
+		}
+
+		// query and cache needed tiles
+		this.queryTiles(needed);
+		return toReturn;
+	};
+
 	this.getWayColor = function(wID) {
+		if (this.pathIDs.indexOf(wID) != -1) {
+			return "cyan";
+		}
+		if (wID in trafficIDs) {
+			var tLevel = trafficIDs[wID];
+			if (tLevel > 5) {
+				return "red";
+			}
+			if (tLevel > 1) {
+				return "orange";
+			}
+			if (tLevel < 1) {
+				return "green";
+			}
+		}
 		return "black";
 	};
 
 	this.getWays = function(sLat, sLng, eLat, eLng) {
+		console.log(sLat);
+		console.log(sLng);
 		var toReturn = new Array();
 		var tileIDs = this.getTiles(sLat, sLng, eLat, eLng);
-		for (var i = 0; i < toGet.length; i++) {
-			var ways = tiles[tileIDs[i]].ways;
+		for (var i = 0; i < tileIDs.length; i++) {
+			var ways = this.tiles[tileIDs[i]];
 			for (var j = 0; j < ways.length; j++) {
 				var w = ways[j];
 				w.color = this.getWayColor(w.id); // add color property
 				toReturn.push(w);
 			}
 		}
+
+		console.log(toReturn);
+
+		return toReturn;
 	};
 
+	/*
 	this.getPath = function() {
 		if (path == undefined) {
 			return undefined;
@@ -143,6 +181,7 @@ var MapData = function() {
 
 		return path.path;
 	};
+	*/
 
 	this.getPathBounds = function() {
 
@@ -153,15 +192,15 @@ var MapDrawer = function(canvasElement, mData) {
 	this.canvas = canvasElement;
 	this.context = this.canvas.getContext("2d");
 	// context width, height
-	var cWi = this.canvas.width();
-	var cHi = this.canvas.height();
+	var cWi = this.canvas.width;
+	var cHi = this.canvas.height;
 	// map data
 	this.mapData = mData;
 
 	// projection radius for cartesian conversion
-	this.PROJ_RADIUS = 100;
+	var PROJ_RADIUS = 1;
 	// road line radius (when viewport width/height matches)
-	this.LINE_WIDTH = 2;
+	var LINE_WIDTH = 2;
 
 	//viewport (canvas), in terms of cartesian coordinates
 	this.viewport = {
@@ -169,11 +208,11 @@ var MapDrawer = function(canvasElement, mData) {
 			x: 0,
 			y: 0,
 
-			minX: -Math.PI * this.PROJ_RADIUS,
-			minY: -Math.PI * this.PROJ_RADIUS,
+			minX: -Math.PI * PROJ_RADIUS,
+			minY: -Math.PI * PROJ_RADIUS,
 
-			maxX: Math.PI * this.PROJ_RADIUS,
-			maxY: Math.PI * this.PROJ_RADIUS
+			maxX: Math.PI * PROJ_RADIUS,
+			maxY: Math.PI * PROJ_RADIUS
 		},
 		size: { //size is width and height, or bottom right coordinate for latlng
 			width: cWi,
@@ -192,18 +231,18 @@ var MapDrawer = function(canvasElement, mData) {
 	// uses mercator projection to turn latlng to cartesian coordinates (origin at 0deg, 0deg)
 	this.latlngToCart = function(lat, lng) {
 		// x = R * lng
-		var x = this.PROJ_RADIUS * lng;
+		var x = PROJ_RADIUS * lng;
 		// y = R * ln(tan(pi/4 + lat/2))
-		var y = this.PROJ_RADIUS * Math.log(Math.tan( (Math.PI/4) + (lat/2) ));
+		var y = PROJ_RADIUS * Math.log(Math.tan( (Math.PI/4) + (lat/2) ));
 
 		return {x:x, y:y};
 	};
 
 	this.cartToLatLng = function(x, y) {
 		// lng = x/R
-		var lng = x / this.PROJ_RADIUS;
+		var lng = x / PROJ_RADIUS;
 		// lat = 2 * atan((y/R)^e) - pi/2
-		var lat = 2 * Math.atan(Math.exp(y / this.PROJ_RADIUS)) - (Math.PI/2);
+		var lat = 2 * Math.atan(Math.exp(y / PROJ_RADIUS)) - (Math.PI/2);
 
 		return {lat:lat, lng:lng};
 	};
@@ -223,7 +262,7 @@ var MapDrawer = function(canvasElement, mData) {
 		this.viewport.origin.y =
 			Math.max(
 				Math.min(
-					oldY + dY,
+					oldY + dy,
 					this.viewport.origin.maxY - this.viewport.size.height),
 				this.viewport.origin.minY);
 
@@ -308,6 +347,7 @@ var MapDrawer = function(canvasElement, mData) {
 			this.drawWay(w.start.lat, w.start.lng, w.end.lat, e.end.lng, w.color);
 		}
 
+		/*
 		// draw the solution path, if exists
 		var path = this.mapData.getPath();
 		if (path != undefined) {
@@ -316,6 +356,7 @@ var MapDrawer = function(canvasElement, mData) {
 				this.drawWay(p.start.lat, p.start.lng, p.end.lat, p.end.lng, "cyan");
 			}
 		}
+		*/
 
 		// draw the endpoints
 		var startPoint = this.mapData.getEndpoint(0);
@@ -412,18 +453,22 @@ var Map = function(canvasId) {
 		}
 	};
 	$(drawer.canvas) // bind mouse events to actions
-	.mousedown(this.mapMouseStart.bind(this))
-	.mousemove(this.mapMouseDrag.bind(this))
-	.mouseup(this.mapMouseStop.bind(this))
-	.mouseenter(this.mapMouseIn.bind(this))
-	.mouseleave(this.mapMouseOut.bind(this))
-	.bind('mousewheel DOMMouseScroll', this.mapMouseWheel.bind(this));
+	.mousedown(mapMouseStart.bind(this))
+	.mousemove(mapMouseDrag.bind(this))
+	.mouseup(mapMouseStop.bind(this))
+	.mouseenter(mapMouseIn.bind(this))
+	.mouseleave(mapMouseOut.bind(this))
+	.bind('mousewheel DOMMouseScroll', mapMouseWheel.bind(this));
 
 	this.beginUpdating = function() {
-		requestAnimationFrame(this.beginUpdating.bind(this));
+		// requestAnimationFrame(this.beginUpdating.bind(this));
 		mapData.queryTraffic();
 		drawer.drawView();
 	};
+
+	// move to beginning latlng
+	var startOrigin = drawer.latlngToCart(41 * toRad, -71 * toRad);
+	drawer.translateView(startOrigin.x, startOrigin.y);
 	// begin drawing/polling loop
 	this.beginUpdating();
 };

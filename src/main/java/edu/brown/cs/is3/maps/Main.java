@@ -248,11 +248,11 @@ public class Main implements Runnable {
       Map<String, Double> changes = new ConcurrentHashMap<>();
 
       Thread t = new Thread(new TrafficManager(trafficPort, traffic, changes));
-      t.start();
+      // t.start();
 
       Server s = new Server(sparkPort, db, traffic, changes);
       s.run();
-      db.close();
+      //db.close();
     } catch (RuntimeException e) {
       System.err.println(e.getMessage());
       db.close();

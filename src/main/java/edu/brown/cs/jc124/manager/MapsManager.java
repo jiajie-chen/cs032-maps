@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import edu.brown.cs.is3.autocorrect.SuggestionHelper;
+import edu.brown.cs.is3.cartesian.RadianLatLng;
+import edu.brown.cs.is3.cartesian.Tile;
 import edu.brown.cs.is3.graph.Graph;
 import edu.brown.cs.is3.graph.Path;
 import edu.brown.cs.is3.maps.Database;
@@ -150,5 +152,15 @@ public class MapsManager {
    */
   public List<String> suggest(String[] words) {
     return autocorrect.suggest(words);
+  }
+
+  /**
+   * Returns the tile at the given location and width.
+   * @param nw the north-west corner of the tile.
+   * @param width the width of the tile.
+   * @return
+   */
+  public Tile getTile(RadianLatLng nw, double width) {
+    return db.tileOfCorner(nw, width);
   }
 }
