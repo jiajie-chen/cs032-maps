@@ -9,11 +9,51 @@ var requestAnimationFrame =
 	    return setTimeout(callback, 16);
 	};
 
-var toRad = Math.PI / 180;
+var TO_RAD = Math.PI / 180;
+
+
+var MapUtilObject = function() {
+	this.PROJ_RADIUS = 100;
+
+	// uses mercator projection to turn latlng to cartesian coordinates (origin at 0deg, 0deg)
+	this.latlngToCart = function(lat, lng) {
+		// x = R * lng
+		var x = this.PROJ_RADIUS * (lng * TO_RAD);
+		// y = R * ln(tan(pi/4 + lat/2))
+		var y = this.PROJ_RADIUS * Math.log(Math.tan( (Math.PI/4) + ((lat * TO_RAD)/2) ));
+
+		return {x:x, y:y};
+	};
+
+	this.cartToLatLng = function(x, y) {
+		// lng = x / R
+		var lng = (x / this.PROJ_RADIUS) / TO_RAD;
+		// lat = 2 * atan((y/R)^e) - pi/2
+		var lat = (2 * Math.atan(Math.exp(y / this.PROJ_RADIUS)) - (Math.PI/2)) / TO_RAD;
+
+		return {lat:lat, lng:lng};
+	};
+
+	this.screenToCart = function(sx, sy, viewport, screenW, screenH) {
+		var x = viewport.origin.x + (x * viewport.size.height / screenW);
+		var y = viewport.origin.y - (y * viewport.size.height / screenH);
+
+		return {x:x, y:y};
+	};
+
+	this.cartToScreen = function(x, y, viewport, screenW, screenH) {
+		var sx = (x - viewport.origin.x) * (screenW / viewport.size.width);
+		var sy = -(y - viewport.origin.y) * (screenH / viewport.size.height);
+
+		return {sx:sx, sy:sy};
+	};
+};
+
+var MapUtil = new MapUtilObject();
 
 var MapData = function() {
 	this.tiles = {};
-	var TILE_SIZE = 0.10;
+	var TILE_SIZE = 1.00;
 
 	var postSync = function(url, data, success) {
 		$.ajax({
@@ -25,7 +65,33 @@ var MapData = function() {
 		});
 	};
 
+	var postAsync = function(url, data, success) {
+		$.ajax({
+			type: 'POST',
+			url: url,
+			data: data,
+			success: success,
+			async: true
+		});
+	};
+
+	var convertWays = function(ways) {
+		var cartWays = new Array();
+
+		for (var i = 0; i < ways.length; i++) {
+			var cartWay = {};
+			cartWay.start = MapUtil.latlngToCart(ways[i].start.lat, ways[i].start.lng);
+			cartWay.end = MapUtil.latlngToCart(ways[i].end.lat, ways[i].end.lng);
+			cartWays.push(cartWay);
+		}
+
+		return cartWays;
+	};
+
 	this.queryTiles = function(tileNWs) {
+		if (tileNWs.length == 0) {
+			return;
+		}
 		var postParameters = {tiles: JSON.stringify(tileNWs)};
 		//console.log(postParameters);
 
@@ -36,8 +102,10 @@ var MapData = function() {
 				var newTiles = results.tiles;
 				for (var i = 0; i < newTiles.length; i++) {
 					var key = newTiles[i].nw.lat + ":" + newTiles[i].nw.lng;
-					this.tiles[key] = newTiles[i].ways;
+					
+					this.tiles[key] = convertWays(newTiles[i].ways);
 				}
+				console.log(this.tiles);
 			}
 		}.bind(this));
 	};
@@ -47,7 +115,7 @@ var MapData = function() {
 
 	this.queryPath = function(url, params) {
 		var results;
-		postSync(url, params, function(responseJSON) {
+		postAsync(url, params, function(responseJSON) {
 			console.log("Received path: " + responseJSON);
 			results = JSON.parse(responseJSON);
 			if (results) {
@@ -93,20 +161,23 @@ var MapData = function() {
 	};
 
 	var currEnd = 0;
-	var startPoint = {lat: 0, lng: 0};
-	var endPoint = {lat: 0, lng: 0};
+	var startPoint = {x: 0, y: 0, active: false};
+	var endPoint = {x: 0, y: 0, active: false};
 
 	this.setEndpoint = function(lat, lng) {
 		if (currEnd == 0) {
 			startPoint.lat = lat;
 			startPoint.lng = lng;
+			startPoint.active = true;
 			currEnd = 1;
 
 			// reset path
+			endPoint.active = false;
 			this.pathIDs = new Array();
 		} else {
 			endPoint.lat = lat;
 			endPoint.lng = lng;
+			endPoint.active = true;
 			currEnd = 0;
 
 			// query for path
@@ -199,17 +270,17 @@ var MapDrawer = function(canvasElement, mData) {
 	this.canvas = canvasElement;
 	this.context = this.canvas.getContext("2d");
 	// context width, height
-	var cWi = $(this.canvas).width();
-	var cHi = $(this.canvas).height();
-	this.canvas.width = cWi;
-	this.canvas.height = cHi;
+	this.cWi = $(this.canvas).width();
+	this.cHi = $(this.canvas).height();
+	this.canvas.width = this.cWi;
+	this.canvas.height = this.cHi;
 	// map data
 	this.mapData = mData;
 
 	// projection radius for cartesian conversion
-	var PROJ_RADIUS = 100;
+	var PROJ_RADIUS = MapUtil.PROJ_RADIUS;
 	// road line radius (when viewport width/height matches)
-	var LINE_WIDTH = 3;
+	var LINE_WIDTH = 2;
 
 	//viewport (canvas), in terms of cartesian coordinates
 	this.viewport = {
@@ -224,36 +295,15 @@ var MapDrawer = function(canvasElement, mData) {
 			maxY: Math.PI * PROJ_RADIUS
 		},
 		size: { //size is width and height, or bottom right coordinate for latlng
-			width: cWi,
-			height: cHi,
+			width: 1,
+			height: 1,
 
-			minWidth: cWi / PROJ_RADIUS,
-			minHeight: cHi / PROJ_RADIUS,
+			minWidth: 10 / PROJ_RADIUS,
+			minHeight: 10 / PROJ_RADIUS,
 
-			maxWidth: cWi * PROJ_RADIUS,
-			maxHeight: cHi * PROJ_RADIUS
+			maxWidth: 10 * PROJ_RADIUS,
+			maxHeight: 10 * PROJ_RADIUS
 		}
-	};
-
-	/*				CONVERSION METHODS					*/
-
-	// uses mercator projection to turn latlng to cartesian coordinates (origin at 0deg, 0deg)
-	this.latlngToCart = function(lat, lng) {
-		// x = R * lng
-		var x = PROJ_RADIUS * lng;
-		// y = R * ln(tan(pi/4 + lat/2))
-		var y = PROJ_RADIUS * Math.log(Math.tan( (Math.PI/4) + (lat/2) ));
-
-		return {x:x, y:y};
-	};
-
-	this.cartToLatLng = function(x, y) {
-		// lng = x / R
-		var lng = x / PROJ_RADIUS;
-		// lat = 2 * atan((y/R)^e) - pi/2
-		var lat = 2 * Math.atan(Math.exp(y / PROJ_RADIUS)) - (Math.PI/2);
-
-		return {lat:lat, lng:lng};
 	};
 
 	// used for auto-draw optimization (don't auto-redraw if nothing is changed)
@@ -305,10 +355,10 @@ var MapDrawer = function(canvasElement, mData) {
 	/*				DRAWING METHODS					*/
 
 	this.drawEndpoints = function(lat, lng, color) {
-		var cart = this.latlngToCart(lat, lng);
+		var cart = MapUtil.latlngToCart(lat, lng);
 		// convert to screen coords
-		var x1 = (cart.x - this.viewport.origin.x) * (cWi / this.viewport.size.width);
-		var y1 = -(cart.y - this.viewport.origin.y) * (cHi / this.viewport.size.height);
+		var x1 = (cart.x - this.viewport.origin.x) * (this.cWi / this.viewport.size.width);
+		var y1 = -(cart.y - this.viewport.origin.y) * (this.cHi / this.viewport.size.height);
 		var x2 = x1;
 		var y2 = y1 - (LINE_WIDTH * 5);
 
@@ -326,19 +376,11 @@ var MapDrawer = function(canvasElement, mData) {
 		this.context.fill();
 	};
 
-	this.drawWay = function(sLat, sLng, eLat, eLng, color) {
-		var sCart = this.latlngToCart(sLat, sLng);
-		var eCart = this.latlngToCart(eLat, eLng);
-
-		// convert to screen coords
-		var x1 = (sCart.x - this.viewport.origin.x) * (cWi / this.viewport.size.width);
-		var y1 = -(sCart.y - this.viewport.origin.y) * (cHi / this.viewport.size.height);
-		var x2 = (eCart.x - this.viewport.origin.x) * (cWi / this.viewport.size.width);
-		var y2 = -(eCart.y - this.viewport.origin.y) * (cHi / this.viewport.size.height);
+	this.drawWay = function(x1, y1, x2, y2, color) {
 		// formula for road width (the more zoomed out, the smaller the roads)
-		var lW = Math.max(0.5, LINE_WIDTH * (cWi / this.viewport.size.width));
+		var lW = LINE_WIDTH; //Math.max(0.5, LINE_WIDTH * (this.cWi / this.viewport.size.width));
 
-		this.context.beginPath();
+		// this.context.beginPath();
 		this.context.lineJoin = "round";
 		this.context.moveTo(x1, y1);
 		this.context.lineTo(x2, y2);
@@ -348,15 +390,15 @@ var MapDrawer = function(canvasElement, mData) {
 	};
 
 	this.drawView = function() {
-		this.context.clearRect(0, 0, cWi, cHi);
+		this.context.clearRect(0, 0, this.cWi, this.cHi);
 
 		// get all ways in bounding box, and draw them
-		var sLatLng = this.cartToLatLng(this.viewport.origin.x, this.viewport.origin.y);
-		var eLatLng = this.cartToLatLng(this.viewport.origin.x + this.viewport.size.width, this.viewport.origin.y - this.viewport.size.height);
+		var sLatLng = MapUtil.cartToLatLng(this.viewport.origin.x, this.viewport.origin.y);
+		var eLatLng = MapUtil.cartToLatLng(this.viewport.origin.x + this.viewport.size.width, this.viewport.origin.y - this.viewport.size.height);
 		var ways = this.mapData.getWays(sLatLng.lat, sLatLng.lng, eLatLng.lat, eLatLng.lng);
 		for (var i = 0; i < ways.length; i++) {
 			var w = ways[i];
-			this.drawWay(w.start.lat, w.start.lng, w.end.lat, e.end.lng, w.color);
+			this.drawWay(w.start.x, w.start.y, w.end.x, w.end.y, w.color);
 		}
 
 		/*
@@ -373,8 +415,12 @@ var MapDrawer = function(canvasElement, mData) {
 		// draw the endpoints
 		var startPoint = this.mapData.getEndpoint(0);
 		var endPoint = this.mapData.getEndpoint(1);
-		this.drawEndpoints(startPoint.lat, startPoint.lng, "green");
-		this.drawEndpoints(endPoint.lat, endPoint.lng, "red");
+		if (startPoint.active) {
+			this.drawEndpoints(startPoint.lat, startPoint.lng, "green");
+		}
+		if (endPoint.active) {
+			this.drawEndpoints(endPoint.lat, endPoint.lng, "red");
+		}
 	};
 };
 
@@ -409,10 +455,11 @@ var Map = function(canvasId) {
 	this.mapClick = function(x, y) {
 		console.log("clicking");
 		// convert to cartesian, on the map
-		var cx = drawer.viewport.origin.x + (y * drawer.viewport.size.height / cWi);
-		var cy = drawer.viewport.origin.y - (y * drawer.viewport.size.height / cHi);
+		var cx = drawer.viewport.origin.x + (x * drawer.viewport.size.height / drawer.cWi);
+		var cy = drawer.viewport.origin.y - (y * drawer.viewport.size.height / drawer.cHi);
 		// convert to latlng
-		var latlng = drawer.cartToLatLng(cx, cy);
+		var latlng = MapUtil.cartToLatLng(cx, cy);
+		console.log(latlng);
 
 		mapData.setEndpoint(latlng.lat, latlng.lng);
 	};
@@ -488,8 +535,8 @@ var Map = function(canvasId) {
 	};
 
 	// move to beginning latlng
-	var startOrigin = drawer.latlngToCart(41 * toRad, -71 * toRad);
-	// drawer.translateView(startOrigin.x, startOrigin.y);
+	var startOrigin = MapUtil.latlngToCart(43, -71);
+	drawer.translateView(startOrigin.x, startOrigin.y);
 	// begin drawing/polling loop
 	this.beginUpdating();
 };

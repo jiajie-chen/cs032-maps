@@ -263,7 +263,7 @@ public class Main implements Runnable {
       System.err.println(e.getMessage());
       return;
     } finally {
-      db.close();
+      // db.close();
     }
   }
 }
