@@ -97,9 +97,9 @@ public class RadianLatLng implements Coordinate {
 
     // a = sin^2(dP/2) + cos(p1) * cos(p2) * sin^2(dL/2)
     double a =
-        Math.pow(Math.sin(dP / 2), 2) +
-            Math.cos(p1) * Math.cos(p2) *
-            Math.pow(Math.sin(dL / 2), 2);
+        Math.pow(Math.sin(dP / 2), 2)
+            + Math.cos(p1) * Math.cos(p2)
+            * Math.pow(Math.sin(dL / 2), 2);
     // c = 2 * atan2(sqrt(a), sqrt(1-a))
     double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     // d = radius * c
@@ -113,7 +113,6 @@ public class RadianLatLng implements Coordinate {
    * lng double p1 = getLat(); // phi 1 double p2 = l.getLat(); // phi 2 double
    * dP = p2 - p1; // delta of phi double dL = l.getLng() - getLng(); // delta
    * of lambda
-   * 
    * // x = dL * cos(avg(p1, p2)) double x = dL * Math.cos((p1 + p2)/2); // y =
    * dP double y = dP; // d = R * sqrt(x^2 + y^2), d^2 = R^2 * (x^2 + y^2)
    * double d2 = EARTH_RADIUS * EARTH_RADIUS * (x*x + y*y); return d2; } //

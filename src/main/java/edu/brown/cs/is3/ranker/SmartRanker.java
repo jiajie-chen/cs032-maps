@@ -4,9 +4,9 @@ import java.io.Serializable;
 import java.util.Map;
 
 /**
- * Ranks the results based on the product of the unigram score
- * and the bigram score divided by the led and previous unigram score.
- * Uses alphabetical order as a tiebreaker. Gives a special bonus to prefixes.
+ * Ranks the results based on the product of the unigram score and the bigram
+ * score divided by the led and previous unigram score. Uses alphabetical order
+ * as a tiebreaker. Gives a special bonus to prefixes.
  * @author is3
  *
  */
@@ -81,12 +81,14 @@ public class SmartRanker implements Ranker, Serializable {
    * @return the LED between the two strings.
    */
   public static int editDistance(String s1, String s2) {
-    if (s1 == null && s2 == null || s1.equals(s2)) {
+    if (s1 == null && s2 == null) {
       return 0;
     } else if (s1 == null || s1.equals("")) {
       return s2.length();
     } else if (s2 == null || s2.equals("")) {
       return s1.length();
+    } else if (s1.equals(s2)) {
+      return 0;
     }
 
     int len1 = s1.length() + 1;

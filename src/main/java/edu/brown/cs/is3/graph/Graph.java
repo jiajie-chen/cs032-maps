@@ -11,7 +11,6 @@ import java.util.Set;
 import edu.brown.cs.is3.maps.Database;
 import edu.brown.cs.is3.maps.Node;
 import edu.brown.cs.is3.maps.Way;
-import edu.brown.cs.is3.maps.WeightedNode;
 
 // should probably be using squared distances!!!!!!!!!!!!!!!!!!!!!!!!!
 /**
@@ -22,17 +21,22 @@ import edu.brown.cs.is3.maps.WeightedNode;
 public class Graph {
   private final Database db;
   private final Map<String, Double> traffic;
-  private Node start;
+  private Node pathStart;
 
   /**
    * Constructs a graph out of a database to hold nodes and ways.
-   * @param db
+   * @param db allowing searches on nodes and ways.
    */
   public Graph(Database db) {
     this.db = db;
     this.traffic = null;
   }
 
+  /**
+   * Builds a traffic enabled graph from a database and a traffic map.
+   * @param db allowing access to nodes and ways.
+   * @param traffic mapping ways to traffic values.
+   */
   public Graph(Database db, Map<String, Double> traffic) {
     this.db = db;
     this.traffic = traffic;
@@ -53,7 +57,7 @@ public class Graph {
       throw new RuntimeException("Those are the same node, silly!");
     }
 
-    this.start = start;
+    this.pathStart = start;
 
     if (traffic != null) {
       return trafficDijkstras(start, end);
@@ -157,6 +161,6 @@ public class Graph {
       toAdd = parents.get(db.nodeOfId(toAdd.getStartId()));
     }
 
-    return new Path(start, curr, toReturn);
+    return new Path(pathStart, curr, toReturn);
   }
 }

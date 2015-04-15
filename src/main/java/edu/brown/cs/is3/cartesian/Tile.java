@@ -16,6 +16,12 @@ public class Tile {
   private final double size;
   private final Set<CompactWay> ways;
 
+  /**
+   * Constructs a tile.
+   * @param nw corner of tile.
+   * @param size length and width of tile.
+   * @param ways contained within the tile in compact form.
+   */
   public Tile(RadianLatLng nw, double size, Set<CompactWay> ways) {
     this.nw = nw;
     this.size = size;

@@ -36,6 +36,15 @@ public class Server implements Runnable {
   private final Map<String, Double> changes;
   private static final double TILE_SIZE = .01;
 
+  /**
+   * Builds a server.
+   * @param port to listen on.
+   * @param db to search data.
+   * @param traffic synchronized traffic map to store and search traffic.
+   *        Updated by another thread.
+   * @param changes synchronized changes map to store changes to traffic.
+   *        Updated by another thread.
+   */
   public Server(int port, Database db,
       Map<String, Double> traffic, Map<String, Double> changes) {
 
@@ -58,8 +67,8 @@ public class Server implements Runnable {
     Spark.post("/changes", new ChangesHandler());
   }
 
-  /**is3
-   * Handles requests for the main web page at /maps.
+  /**
+   * is3 Handles requests for the main web page at /maps.
    * @author is3
    *
    */
@@ -174,7 +183,7 @@ public class Server implements Runnable {
 
       if (sLat != null && sLng != null
           && eLat != null && eLng != null) {
-        
+
         double startLat = gson.fromJson(qm.value("startLat"), Double.class);
         double startLng = gson.fromJson(qm.value("startLng"), Double.class);
         double endLat = gson.fromJson(qm.value("endLat"), Double.class);
@@ -195,7 +204,7 @@ public class Server implements Runnable {
       return gson.toJson(variables);
     }
   }
-  
+
   /**
    * Handles tile requests for map display.
    * @author is3
@@ -207,8 +216,10 @@ public class Server implements Runnable {
     public Object handle(final Request req, final Response res) {
       QueryParamsMap qm = req.queryMap();
       String jsonTiles = qm.value("tiles");
-      
-      Type listType = new TypeToken<ArrayList<RadianLatLng>>() {} .getType();
+
+      Type listType =
+          new TypeToken<ArrayList<RadianLatLng>>() {
+          }.getType();
       List<RadianLatLng> nwCorners = new Gson().fromJson(jsonTiles, listType);
       
       ImmutableList.Builder<Tile> tiles = new ImmutableList.Builder<Tile>();
@@ -233,7 +244,7 @@ public class Server implements Runnable {
 
     @Override
     public Object handle(final Request req, final Response res) {
-      QueryParamsMap qm = req.queryMap();
+      // QueryParamsMap qm = req.queryMap();
       Map<String, Double> toSend = ImmutableMap.copyOf(changes);
       changes.clear();
 

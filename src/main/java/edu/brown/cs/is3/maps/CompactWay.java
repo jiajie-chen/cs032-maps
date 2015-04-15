@@ -14,12 +14,23 @@ public class CompactWay {
   private final RadianLatLng start;
   private final RadianLatLng end;
 
+  /**
+   * Builds a compact way between two points.
+   * @param start node.
+   * @param end node.
+   * @param id of way.
+   */
   public CompactWay(RadianLatLng start, RadianLatLng end, String id) {
     this.start = start;
     this.end = end;
     this.id = id;
   }
-  
+
+  /**
+   * Builds a compact way without an id.
+   * @param start node.
+   * @param end node.
+   */
   public CompactWay(RadianLatLng start, RadianLatLng end) {
     this.start = start;
     this.end = end;
