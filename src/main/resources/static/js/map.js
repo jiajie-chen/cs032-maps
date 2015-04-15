@@ -13,26 +13,138 @@ var MapData = function() {
 	var tiles = {};
 	var TILE_SIZE = 0.10;
 
+	this.queryTiles = function(tileNWs) {
+		var postParameters = {};
+
+		var results;
+		$.post("/tile", postParameters, function(responseJSON) {
+			console.log("Received tiles: " + responseJSON);
+			results = JSON.parse(responseJSON);
+		});
+
+		for (var i = 0; i < results.length; i++) {
+		}
+	};
+
+	var path = undefined;
+	// var querySuccess = false;
+
+	this.queryIntersection = function(sStreet, sCross, eStreet, eCross) {
+		var postParameters = {
+			startStreet: sStreet,
+			startCross: sCross,
+			endStreet: eStreet,
+			endCross: sCross
+		};
+
+		var results;
+		$.post("/intersection", postParameters, function(responseJSON) {
+			console.log("Received path: " + responseJSON);
+			results = JSON.parse(responseJSON);
+		});
+		path = results.path;
+	};
+
+	this.queryPoint = function(sLat, sLng, eLat, eLng) {
+		var postParameters = {
+			startLat: sLat,
+			startLng: sLng,
+			endLat: eLat,
+			endLng: eLng
+		};
+
+		var results;
+		$.post("/point", postParameters, function(responseJSON) {
+			console.log("Received path: " + responseJSON);
+			results = JSON.parse(responseJSON);
+		});
+		path = results.path;
+	};
+
+	this.queryTraffic = function() {
+
+	};
+
 	this.getTiles = function(sLat, sLng, eLat, eLng) {
-		var needed = {};
-		var lat = ; // snap to tile lat boundary
-		for (; lat <= eLat; lat += TILE_SIZE) {
+		// init needed tiles by going through all tiles in bounding box and seeing if cached
+		var needed = new Array();
+		var toReturn = new Array();
+		var lat = Math.ceil(sLat / TILE_SIZE) * TILE_SIZE; // snap to tile lat boundary
+		for (; lat < eLat; lat += TILE_SIZE) {
 			var lng = Math.floor(sLng / TILE_SIZE) * TILE_SIZE; // snap to tile lng boundary
-			for (; lng <= eLng; lng == TILE_SIZE) {
-				needed[""+lat+lng]
+			for (; lng < eLng; lng += TILE_SIZE) {
+				var key = lat + ":" + lng;
+
+				// not already in cache
+				if (!(key in tiles)) {
+					needed.push({lat:lat, lng:lng});
+				}
+
+				toReturn.push(key); // add id to returned array
+			}
+		}
+
+		// query and cache needed tiles
+		this.queryTiles(needed);
+		return toReturn;
+	};
+
+	var currEnd = 0;
+	var startPoint = {lat: 0, lng: 0};
+	var endPoint = {lat: 0, lng: 0};
+
+	this.setEndpoints = function(lat, lng) {
+		if (currEnd == 0) {
+			startPoint.lat = lat;
+			startPoint.lng = lng;
+			currEnd = 1;
+
+			// reset path
+			path = undefined;
+		} else {
+			endPoint.lat = lat;
+			endPoint.lng = lng;
+			currEnd = 0;
+
+			// query for path
+			this.queryPoint(startPoint.lat, startPoint.lng, endPoint.lat, endPoint.lng);
+		}
+	};
+
+	this.getEndpoint = function(num) {
+		if (num == 0) {
+			return startPoint;
+		} else {
+			return endPoint;
+		}
+	};
+
+	this.getWayColor = function(wID) {
+		return "black";
+	};
+
+	this.getWays = function(sLat, sLng, eLat, eLng) {
+		var toReturn = new Array();
+		var tileIDs = this.getTiles(sLat, sLng, eLat, eLng);
+		for (var i = 0; i < toGet.length; i++) {
+			var ways = tiles[tileIDs[i]].ways;
+			for (var j = 0; j < ways.length; j++) {
+				var w = ways[j];
+				w.color = this.getWayColor(w.id); // add color property
+				toReturn.push(w);
 			}
 		}
 	};
 
-	this.setEndpoints = function(x, y) {
+	this.getPath = function() {
+		if (path == undefined) {
+			return undefined;
+		}
 
+		return path.path;
 	};
 
-	this.getWays = function(sLat, sLng, eLat, eLng) {
-
-	};
-
-	this.getTraffic = function() {
+	this.getPathBounds = function() {
 
 	};
 };
@@ -144,18 +256,13 @@ var MapDrawer = function(canvasElement, mData) {
 
 	/*				DRAWING METHODS					*/
 
-	this.drawEndpoints = function(lat, lng, endNum) {
+	this.drawEndpoints = function(lat, lng, color) {
 		var cart = this.latlngToCart(lat, lng);
 		// convert to screen coords
 		var x1 = (cart.x - this.viewport.origin.x) * (cWi / this.viewport.size.width);
 		var y1 = -(cart.y - this.viewport.origin.y) * (cHi / this.viewport.size.height);
 		var x2 = x1;
 		var y2 = y1 - (LINE_WIDTH * 3);
-		// choose color
-		var color = "green";
-		if (endNum == 2) {
-			color = "red";
-		}
 
 		this.context.arc(x2, y2, LINE_WIDTH, 0, 2 * Math.PI, false);
 		this.context.fillStyle = color;
@@ -196,19 +303,25 @@ var MapDrawer = function(canvasElement, mData) {
 		var sLatLng = this.cartToLatLng(this.viewport.origin.x, this.viewport.origin.y);
 		var eLatLng = this.cartToLatLng(this.viewport.origin.x + this.viewport.size.height, this.viewport.origin.y - this.viewport.size.height);
 		var ways = this.mapData.getWays(sLatLng.lat, sLatLng.lng, eLatLng.lat, eLatLng.lng);
-		for(var i = 0; i < ways.length; i++) {
+		for (var i = 0; i < ways.length; i++) {
 			var w = ways[i];
-			this.drawWay(w.begin.lat, w.begin.lng, w.end.lat, e.end.lng, w.color);
+			this.drawWay(w.start.lat, w.start.lng, w.end.lat, e.end.lng, w.color);
 		}
 
-		// draw the solution path
+		// draw the solution path, if exists
 		var path = this.mapData.getPath();
-		if (path) {
-			for(var i = 0; i < ways.length; i++) {
-				var w = ways[i];
-				this.drawWay(w.begin.lat, w.begin.lng, w.end.lat, e.end.lng, "cyan");
+		if (path != undefined) {
+			for (var i = 0; i < ways.length; i++) {
+				var p = path[i];
+				this.drawWay(p.start.lat, p.start.lng, p.end.lat, p.end.lng, "cyan");
 			}
 		}
+
+		// draw the endpoints
+		var startPoint = this.mapData.getEndpoint(0);
+		var endPoint = this.mapData.getEndpoint(1);
+		this.drawEndpoints(startPoint.lat, startPoint.lng, "green");
+		this.drawEndpoints(endPoint.lat, endPoint.lng, "red");
 	};
 };
 
@@ -218,8 +331,9 @@ var Map = function(canvasId) {
 	this.offX = drawer.canvas.offsetLeft;
 	this.offY = drawer.canvas.offsetTop;
 
-	this.mapStreetQuery = function(sStreet, sCross, eStreet, eCross) {
-		this.mapData.queryIntersection(sStreet, sCross, eStreet, eCross);
+	this.mapQueryIntersection = function(sStreet, sCross, eStreet, eCross) {
+		mapData.queryIntersection(sStreet, sCross, eStreet, eCross);
+		var bounds = mapData.getPathBounds();
 	};
 
 	this.mapScroll = function(upScroll) {
@@ -241,8 +355,10 @@ var Map = function(canvasId) {
 		// convert to cartesian, on the map
 		var cx = drawer.viewport.origin.x + x;
 		var cy = drawer.viewport.origin.y - y;
+		// convert to latlng
+		var latlng = drawer.cartToLatLng(cx, cy);
 
-		mapData.setEndpoint(cx, cy);
+		mapData.setEndpoint(latlng.lat, latlng.lng);
 	};
 
 	var DRAG_DIST = 5; // drag threshold
@@ -305,8 +421,8 @@ var Map = function(canvasId) {
 
 	this.beginUpdating = function() {
 		requestAnimationFrame(this.beginUpdating.bind(this));
+		mapData.queryTraffic();
 		drawer.drawView();
-		mapData.getTraffic();
 	};
 	// begin drawing/polling loop
 	this.beginUpdating();
