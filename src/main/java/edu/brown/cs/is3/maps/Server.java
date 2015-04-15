@@ -129,10 +129,10 @@ public class Server implements Runnable {
       if (startStreet != null && startCross != null
           && endStreet != null && endCross != null) {
 
-        startStreet = gson.fromJson(qm.value("inputStart"), String.class);
-        startCross = gson.fromJson(qm.value("inputStart"), String.class);
-        endStreet = gson.fromJson(qm.value("inputStart"), String.class);
-        endCross = gson.fromJson(qm.value("inputStart"), String.class);
+        startStreet = gson.fromJson(qm.value("startStreet"), String.class);
+        startCross = gson.fromJson(qm.value("startCross"), String.class);
+        endStreet = gson.fromJson(qm.value("endStreet"), String.class);
+        endCross = gson.fromJson(qm.value("endCross"), String.class);
 
         toReturn = m.getPathByIntersections(
             startStreet, startCross, endStreet, endCross, traffic);
@@ -160,21 +160,25 @@ public class Server implements Runnable {
       QueryParamsMap qm = req.queryMap();
       Path toReturn;
 
-      String start = qm.value("start");
-      String end = qm.value("end");
+      String sLat = qm.value("startLat");
+      String eLat = qm.value("endLat");
+      String startCross = qm.value("startLng");
+      String endCross = qm.value("endLng");
 
-      System.out.println("Start: " + start + " End: " + end);
+      System.out.println("Start[ Lat: " + sLat + " Lng: " + startCross
+          + "] End[ Lat: " + eLat + " Lng: " + endCross + "]");
 
-      if (start != null && end != null) {
-
-        RadianLatLng startPoint =
-            gson.fromJson(qm.value("inputStart"), RadianLatLng.class);
-        RadianLatLng endPoint =
-            gson.fromJson(qm.value("inputStart"), RadianLatLng.class);
+      if (sLat != null && startCross != null
+          && eLat != null && endCross != null) {
+        
+        double startLat = gson.fromJson(qm.value("startLat"), Double.class);
+        double startLng = gson.fromJson(qm.value("startLng"), Double.class);
+        double endLat = gson.fromJson(qm.value("endLat"), Double.class);
+        double endLng = gson.fromJson(qm.value("endLng"), Double.class);
 
         toReturn = m.getPathByPoints(
-            startPoint.getLat(), startPoint.getLng(),
-            endPoint.getLat(), endPoint.getLng(),
+            startLat, startLng,
+            endLat, endLng,
             traffic);
       } else {
         // TODO
