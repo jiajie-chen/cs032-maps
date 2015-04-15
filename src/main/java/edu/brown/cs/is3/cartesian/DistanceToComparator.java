@@ -6,7 +6,7 @@ import java.util.Map;
 import edu.brown.cs.is3.maps.Node;
 
 /**
- * Comparator class for sorting by a star distance.
+ * Comparator class for sorting by a-star distance.
  * @author is3
  *
  */

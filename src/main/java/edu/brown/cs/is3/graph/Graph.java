@@ -2,9 +2,11 @@ package edu.brown.cs.is3.graph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Set;
 
 import edu.brown.cs.is3.cartesian.DistanceToComparator;
 import edu.brown.cs.is3.maps.Database;
@@ -36,8 +38,6 @@ public class Graph {
     this.traffic = traffic;
   }
 
-  // be wary of intersections and many streets with same names
-  // ie cross of oak and maple
   // g is distance so far
   // h is a heuristic
   // f is the total distance (g + h)
@@ -55,10 +55,14 @@ public class Graph {
 
     this.start = start;
 
+    if (traffic != null) {
+      return trafficDijkstras(start, end);
+    }
+
     Map<Node, Double> distances = new HashMap<>(); // the distances list (g)
     PriorityQueue<Node> open = new PriorityQueue<>(
         new DistanceToComparator(end, distances)); // the open list (by f)
-    Map<Node, Double> closed = new HashMap<>(); // the explored distances list
+    Set<Node> closed = new HashSet<>(); // the explored list
     Map<Node, Way> parents = new HashMap<>(); // (node, way to node)
 
     distances.put(start, 0.0);
@@ -72,16 +76,61 @@ public class Graph {
         return generateSolution(curr, parents);
       }
 
-      closed.put(curr, distances.get(curr) + curr.getDistance(end));
+      closed.add(curr);
 
       for (String wayId : curr.getWayIDs()) {
         Way w = db.wayOfId(wayId);
-        Node next = db.nodeOfId(w.getEndId()); // TODO check directed graphs
+        Node next = db.nodeOfId(w.getEndId());
 
-        if (!closed.containsKey(next)) {
-          distances.put(next, distances.get(curr) + curr.getDistance(end));
+        if (!closed.contains(next)) {
+          distances.put(next, distances.get(curr) + curr.getDistance(next));
           open.add(next);
-          parents.put(next, w); // make sure this whole parents thing works
+          parents.put(next, w);
+        }
+      }
+    }
+
+    return new Path(start, end); // path with no ways
+  }
+
+  /**
+   * Helper procedure for Dijkstra's if there is traffic. Essentially performs a
+   * lot of the same procedures. There is a lot of duplicate code, but it allows
+   * us to cut down on several unnecessary calls in the inner loop if traffic is
+   * not required.
+   * @param start node to start from.
+   * @param end node to end at.
+   * @return path with the shortest set of ways or null list if no path exists.
+   */
+  private Path trafficDijkstras(Node start, Node end) {
+    Map<Node, Double> distances = new HashMap<>(); // the distances list (g)
+    PriorityQueue<Node> open = new PriorityQueue<>(
+        new DistanceToComparator(end, distances)); // the open list (by f)
+    Set<Node> closed = new HashSet<>(); // the explored list
+    Map<Node, Way> parents = new HashMap<>(); // (node, way to node)
+
+    distances.put(start, 0.0);
+    open.add(start);
+    parents.put(start, null);
+
+    while (!open.isEmpty()) {
+      Node curr = open.poll();
+
+      if (curr.equals(end)) {
+        return generateSolution(curr, parents);
+      }
+
+      closed.add(curr);
+
+      for (String wayId : curr.getWayIDs()) {
+        Way w = db.wayOfId(wayId);
+        Node next = db.nodeOfId(w.getEndId());
+
+        if (!closed.contains(next)) {
+          distances.put(next, distances.get(curr)
+              + traffic.getOrDefault(wayId, 1.0) * curr.getDistance(next));
+          open.add(next);
+          parents.put(next, w);
         }
       }
     }

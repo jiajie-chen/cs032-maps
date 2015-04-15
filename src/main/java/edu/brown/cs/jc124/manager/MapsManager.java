@@ -46,6 +46,14 @@ public class MapsManager {
     return path;
   }
 
+  /**
+   * Returns the shortest path between two nodes based on a database and a map
+   * of traffic through the graph.
+   * @param start point.
+   * @param end point.
+   * @return list of ways as a path along the shortest path between the points
+   *         or a path with a null list of ways if no path exists.
+   */
   private Path getShortestPathTraffic(
       Node start, Node end, Map<String, Double> traffic) {
 
@@ -64,7 +72,9 @@ public class MapsManager {
    * @return list of ways as a path along the shortest path between the points
    *         or a path with a null list of ways if no path exists.
    */
-  public Path getPathByPoints(Double lat1, Double lng1, Double lat2, Double lng2) {
+  public Path getPathByPoints(
+      double lat1, double lng1, double lat2, double lng2) {
+
     KdMapNode closestStart = mapsKd.getPointClosest(lat1, lng1);
     KdMapNode closestEnd = mapsKd.getPointClosest(lat2, lng2);
 
@@ -72,6 +82,28 @@ public class MapsManager {
     Node end = db.nodeOfId(closestEnd.getId());
 
     return getShortestPath(start, end);
+  }
+
+  /**
+   * Alternate signal for handling traffic.
+   * @param lat1 lat of first point.
+   * @param lng1 lng of first point.
+   * @param lat2 lat of second point.
+   * @param lng2 lng of second point.
+   * @return list of ways as a path along the shortest path between the points
+   *         or a path with a null list of ways if no path exists.
+   */
+  public Path getPathByPoints(
+      double lat1, double lng1, double lat2, double lng2,
+      Map<String, Double> traffic) {
+
+    KdMapNode closestStart = mapsKd.getPointClosest(lat1, lng1);
+    KdMapNode closestEnd = mapsKd.getPointClosest(lat2, lng2);
+
+    Node start = db.nodeOfId(closestStart.getId());
+    Node end = db.nodeOfId(closestEnd.getId());
+
+    return getShortestPathTraffic(start, end, traffic);
   }
 
   /**
@@ -85,10 +117,30 @@ public class MapsManager {
    */
   public Path getPathByIntersections(String startStreet, String startCross,
       String endStreet, String endCross) {
+
     Node start = db.nodeOfIntersection(startStreet, startCross);
     Node end = db.nodeOfIntersection(endStreet, endCross);
 
     return getShortestPath(start, end);
+  }
+
+  /**
+   * Alternately signature for handling traffic.
+   * @param startStreet start corner.
+   * @param startCross other start corner.
+   * @param endStreet end corner.
+   * @param endCross other end corner.
+   * @return list of ways as a path along the shortest path between the
+   *         intersection of the two streets or a path with a null list of ways
+   *         if no path exists.
+   */
+  public Path getPathByIntersections(String startStreet, String startCross,
+      String endStreet, String endCross, Map<String, Double> traffic) {
+
+    Node start = db.nodeOfIntersection(startStreet, startCross);
+    Node end = db.nodeOfIntersection(endStreet, endCross);
+
+    return getShortestPathTraffic(start, end, traffic);
   }
 
   /**
@@ -99,5 +151,4 @@ public class MapsManager {
   public List<String> suggest(String[] words) {
     return autocorrect.suggest(words);
   }
-
 }
