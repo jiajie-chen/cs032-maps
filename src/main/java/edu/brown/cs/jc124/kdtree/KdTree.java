@@ -15,8 +15,7 @@ import com.google.common.collect.MinMaxPriorityQueue;
  *         An implementation of an immutable KdTree for searching through
  *         spatial/multi-dimensional data.
  *
- * @param <T>
- *          the coordinate type this KdTree will operate on
+ * @param <T> the coordinate type this KdTree will operate on
  */
 public class KdTree<T extends Coordinate> extends AbstractCollection<T>
     implements RangeSearchable<T> {
@@ -26,8 +25,7 @@ public class KdTree<T extends Coordinate> extends AbstractCollection<T>
    *
    *         The class to hold the tree's node data.
    *
-   * @param <T>
-   *          the coordinate type this KdTree will operate on
+   * @param <T> the coordinate type this KdTree will operate on
    */
   private final class KdNode {
     private KdNode left, right;
@@ -58,12 +56,8 @@ public class KdTree<T extends Coordinate> extends AbstractCollection<T>
   /**
    * Makes a new KdTree that stores coordinates of a certain dimension.
    *
-   * @param dimensions
-   *          the dimension to use in the tree
-   * @param coords
-   *          the coordinates to store
-   * @throws DimensionMismatchException
-   *           if the given coords don't match the given dimensions
+   * @param dimensions the dimension to use in the tree
+   * @param coords the coordinates to store
    */
   public KdTree(int dimensions, List<T> coords) {
     kDim = dimensions;

@@ -27,6 +27,12 @@ public class Database {
   private final Map<Node, Way> wayByNode = new HashMap<>();
   private final Map<RadianLatLng, Tile> tileByCorner = new HashMap<>();
 
+  private static final int FIRST = 1;
+  private static final int SECOND = 2;
+  private static final int THIRD = 3;
+  private static final int FOURTH = 4;
+  private static final int FIFTH = 5;
+
   /**
    * Constructs a db.
    * @param path to the database.
@@ -99,16 +105,16 @@ public class Database {
             + "ORDER BY id;";
 
     try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery)) {
-      nodePS.setString(1, id);
-      nodePS.setString(2, id);
+      nodePS.setString(FIRST, id);
+      nodePS.setString(SECOND, id);
 
       try (ResultSet nodeRS = nodePS.executeQuery()) {
         Double lat;
         Double lng;
 
         if (nodeRS.next()) {
-          lat = Double.parseDouble(nodeRS.getString(2));
-          lng = Double.parseDouble(nodeRS.getString(3));
+          lat = Double.parseDouble(nodeRS.getString(SECOND));
+          lng = Double.parseDouble(nodeRS.getString(THIRD));
         } else {
           close();
           throw new RuntimeException("No node with that id.");
@@ -117,9 +123,9 @@ public class Database {
         toReturn = new Node(id, new RadianLatLng(lat, lng));
 
         while (nodeRS.next()) {
-          String wayId = nodeRS.getString(1);
-          String name = nodeRS.getString(2);
-          String endId = nodeRS.getString(3);
+          String wayId = nodeRS.getString(FIRST);
+          String name = nodeRS.getString(SECOND);
+          String endId = nodeRS.getString(THIRD);
 
           Way w = new Way(wayId, name, id, endId);
           wayById.put(wayId, w);
@@ -149,15 +155,15 @@ public class Database {
     String nodeQuery = "SELECT latitude, longitude FROM node WHERE id = ?;";
 
     try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery)) {
-      nodePS.setString(1, id);
+      nodePS.setString(FIRST, id);
 
       try (ResultSet nodeRS = nodePS.executeQuery()) {
         Double lat;
         Double lng;
 
         if (nodeRS.next()) {
-          lat = Double.parseDouble(nodeRS.getString(1));
-          lng = Double.parseDouble(nodeRS.getString(2));
+          lat = Double.parseDouble(nodeRS.getString(FIRST));
+          lng = Double.parseDouble(nodeRS.getString(SECOND));
         } else {
           close();
           throw new RuntimeException("No node with that id.");
@@ -195,9 +201,9 @@ public class Database {
         String endID;
 
         while (wayRS.next()) {
-          wayId = wayRS.getString(1);
-          name = wayRS.getString(2);
-          endID = wayRS.getString(3);
+          wayId = wayRS.getString(FIRST);
+          name = wayRS.getString(SECOND);
+          endID = wayRS.getString(THIRD);
 
           Way toAdd = new Way(wayId, name, n.getId(), endID);
           wayById.put(wayId, toAdd);
@@ -222,8 +228,7 @@ public class Database {
       return wayById.get(id);
     }
 
-    String wayQuery = "SELECT name, start, end FROM way WHERE id = ? ;"; // LIMIT
-                                                                         // 1;";
+    String wayQuery = "SELECT name, start, end FROM way WHERE id = ? ;";
 
     try (PreparedStatement wayPS = conn.prepareStatement(wayQuery)) {
       wayPS.setString(1, id);
@@ -234,9 +239,9 @@ public class Database {
         String endID;
 
         if (wayRS.next()) {
-          name = wayRS.getString(1);
-          startID = wayRS.getString(2);
-          endID = wayRS.getString(3);
+          name = wayRS.getString(FIRST);
+          startID = wayRS.getString(SECOND);
+          endID = wayRS.getString(THIRD);
         } else {
           close();
           throw new RuntimeException("No way with that id.");
@@ -257,11 +262,11 @@ public class Database {
    * such intersections exist, it returns one such intersection. Does not cache.
    * @param streetName first street.
    * @param crossName second street.
-   * @return
+   * @return a node at an intersection of the two named streets.
    */
   public Node nodeOfIntersection(String streetName, String crossName) {
-    String interQuery = "SELECT street.start FROM way AS street INNER JOIN way AS cross "
-        + "ON street.start = cross.start WHERE "
+    String interQuery = "SELECT street.start FROM way AS street "
+        + "INNER JOIN way AS cross ON street.start = cross.start WHERE "
         + "(street.name = ? AND cross.name = ?) "
         + "UNION "
         + "SELECT street.start FROM way AS street INNER JOIN way AS cross "
@@ -278,7 +283,7 @@ public class Database {
         + "LIMIT 1;";
 
     try (PreparedStatement interPS = conn.prepareStatement(interQuery)) {
-      for (int i = 0; i < 8; i += 2) {
+      for (int i = 0; i < (FOURTH * SECOND); i += 2) {
         interPS.setString(i + 1, streetName);
         interPS.setString(i + 2, crossName);
       }
@@ -287,7 +292,7 @@ public class Database {
         String nodeID;
 
         if (interRS.next()) {
-          nodeID = interRS.getString(1);
+          nodeID = interRS.getString(FIRST);
         } else {
           close();
           throw new RuntimeException("No intersection between " + streetName
@@ -314,9 +319,9 @@ public class Database {
       try (ResultSet nodeRS = nodePS.executeQuery()) {
 
         while (nodeRS.next()) {
-          String nodeId = nodeRS.getString(1);
-          Double lat = Double.parseDouble(nodeRS.getString(2));
-          Double lng = Double.parseDouble(nodeRS.getString(3));
+          String nodeId = nodeRS.getString(FIRST);
+          Double lat = Double.parseDouble(nodeRS.getString(SECOND));
+          Double lng = Double.parseDouble(nodeRS.getString(THIRD));
 
           KdMapNode n = new KdMapNode(nodeId, lat, lng);
           toReturn.add(n);
@@ -334,13 +339,15 @@ public class Database {
    * Searches for and returns a tile containing a set of compact ways based on
    * the northwest corner with a width specified by TILE_SIZE. Assumes there can
    * only be one tile beginning at a given point.
-   * @param nw
-   * @return
+   * @param nw corner of tile to look for.
+   * @param width of the bounding box.
+   * @return a tile containing a square bounding box of size width extending
+   *         south and east from nw.
    */
   public Tile tileOfCorner(RadianLatLng nw, double width) {
-    Tile toReturn;
+    Tile toReturn = tileByCorner.get(nw);
 
-    if ((toReturn = tileByCorner.get(nw)) != null) {
+    if (toReturn != null) {
       return toReturn;
     }
 
@@ -360,11 +367,11 @@ public class Database {
         + "WHERE (e.latitude <= ? AND e.latitude >= ? "
         + "AND e.longitude >= ? AND e.longitude <= ?);";
     try (PreparedStatement wayPS = conn.prepareStatement(wayQuery)) {
-      for (int i = 0; i < 8; i += 4) {
-        wayPS.setDouble(i + 1, top);
-        wayPS.setDouble(i + 2, bot);
-        wayPS.setDouble(i + 3, left);
-        wayPS.setDouble(i + 4, right);
+      for (int i = 0; i < FOURTH * SECOND; i += FOURTH) {
+        wayPS.setDouble(i + FIRST, top);
+        wayPS.setDouble(i + SECOND, bot);
+        wayPS.setDouble(i + THIRD, left);
+        wayPS.setDouble(i + FOURTH, right);
       }
 
       try (ResultSet wayRS = wayPS.executeQuery()) {
@@ -372,12 +379,12 @@ public class Database {
         while (wayRS.next()) {
 
           RadianLatLng start = new RadianLatLng(
-              Double.parseDouble(wayRS.getString(2)),
-              Double.parseDouble(wayRS.getString(3)));
+              Double.parseDouble(wayRS.getString(SECOND)),
+              Double.parseDouble(wayRS.getString(THIRD)));
 
-          RadianLatLng end = coordinatesOfId(wayRS.getString(4));
+          RadianLatLng end = coordinatesOfId(wayRS.getString(FOURTH));
 
-          ways.add(new CompactWay(start, end, wayRS.getString(1)));
+          ways.add(new CompactWay(start, end, wayRS.getString(FIRST)));
         }
       }
     } catch (SQLException e) {
@@ -400,18 +407,19 @@ public class Database {
       return nodeById.get(id).getPos();
     }
 
-    String nodeQuery = "SELECT node.latitude, node.longitude FROM node WHERE node.id = ?;";
+    String nodeQuery =
+        "SELECT node.latitude, node.longitude FROM node WHERE node.id = ?;";
 
     try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery)) {
-      nodePS.setString(1, id);
+      nodePS.setString(FIRST, id);
 
       try (ResultSet nodeRS = nodePS.executeQuery()) {
         Double lat;
         Double lng;
 
         if (nodeRS.next()) {
-          lat = Double.parseDouble(nodeRS.getString(1));
-          lng = Double.parseDouble(nodeRS.getString(2));
+          lat = Double.parseDouble(nodeRS.getString(FIRST));
+          lng = Double.parseDouble(nodeRS.getString(SECOND));
         } else {
           close();
           throw new RuntimeException("No node with that id.");

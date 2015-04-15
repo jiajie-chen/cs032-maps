@@ -216,11 +216,13 @@ public class Server implements Runnable {
       QueryParamsMap qm = req.queryMap();
       String jsonTiles = qm.value("tiles");
 
-      Type listType = new TypeToken<ArrayList<RadianLatLng>>() {
-      }.getType();
+      Type listType =
+          new TypeToken<ArrayList<RadianLatLng>>() {
+          }.getType();
       List<RadianLatLng> nwCorners = new Gson().fromJson(jsonTiles, listType);
 
-      ImmutableMap.Builder<String, Tile> tiles = new ImmutableMap.Builder<String, Tile>();
+      ImmutableMap.Builder<String, Tile> tiles =
+          new ImmutableMap.Builder<String, Tile>();
       for (RadianLatLng c : nwCorners) {
         String tID = c.getLat() + ":" + c.getLng();
         tiles.put(tID, m.getTile(c, TILE_SIZE));
@@ -243,7 +245,7 @@ public class Server implements Runnable {
 
     @Override
     public Object handle(final Request req, final Response res) {
-      QueryParamsMap qm = req.queryMap();
+      // QueryParamsMap qm = req.queryMap();
       Map<String, Double> toSend = ImmutableMap.copyOf(changes);
       changes.clear();
 

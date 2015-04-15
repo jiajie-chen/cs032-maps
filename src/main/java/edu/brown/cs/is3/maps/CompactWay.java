@@ -18,6 +18,7 @@ public class CompactWay {
    * Builds a compact way between two points.
    * @param start node.
    * @param end node.
+   * @param id of way.
    */
   public CompactWay(RadianLatLng start, RadianLatLng end, String id) {
     this.start = start;

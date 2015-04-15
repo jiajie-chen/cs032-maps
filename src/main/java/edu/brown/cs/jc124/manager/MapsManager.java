@@ -136,6 +136,8 @@ public class MapsManager {
    * @param startCross other start corner.
    * @param endStreet end corner.
    * @param endCross other end corner.
+   * @param traffic map of ways to traffic values updated elsewhere for
+   *        searching.
    * @return list of ways as a path along the shortest path between the
    *         intersection of the two streets or a path with a null list of ways
    *         if no path exists.
@@ -162,7 +164,7 @@ public class MapsManager {
    * Returns the tile at the given location and width.
    * @param nw the north-west corner of the tile.
    * @param width the width of the tile.
-   * @return
+   * @return a tile at the given location with the given width.
    */
   public Tile getTile(RadianLatLng nw, double width) {
     return db.tileOfCorner(nw, width);
