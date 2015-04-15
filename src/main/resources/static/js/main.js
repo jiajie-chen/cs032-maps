@@ -1,4 +1,4 @@
- $(document).ready(function() {
+ $(window).load(function() {
   /*
     var sb = document.getElementById("start");
     var eb = document.getElementById("end");

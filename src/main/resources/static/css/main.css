@@ -31,8 +31,8 @@ h1 {
 
 #mapCanvas {
     /*position:absolute;*/
-    width: 100%;
-    height: auto;
+    width: 500px;
+    height: 500px;
 }
 
 input.searchBar {
