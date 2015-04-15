@@ -261,8 +261,9 @@ public class Main implements Runnable {
       // db.close();
     } catch (RuntimeException e) {
       System.err.println(e.getMessage());
-      db.close();
       return;
+    } finally {
+      db.close();
     }
   }
 }

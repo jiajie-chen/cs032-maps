@@ -24,14 +24,12 @@ public class Database {
   private final Connection conn;
   private final Map<String, Way> wayById = new HashMap<>();
   private final Map<String, Node> nodeById = new HashMap<>();
-  private final Map<Node, Way> wayByNode = new HashMap<>();
   private final Map<RadianLatLng, Tile> tileByCorner = new HashMap<>();
 
   private static final int FIRST = 1;
   private static final int SECOND = 2;
   private static final int THIRD = 3;
   private static final int FOURTH = 4;
-  private static final int FIFTH = 5;
 
   /**
    * Constructs a db.
