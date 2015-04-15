@@ -6,7 +6,7 @@ import java.util.Set;
 import edu.brown.cs.is3.cartesian.RadianLatLng;
 
 /**
- * Class representing a node object in the database;
+ * Class representing a node object in the database.
  * @author is3
  *
  */
@@ -69,7 +69,7 @@ public class Node {
 
   /**
    * Adds a way to this nodes set of ways.
-   * @param w
+   * @param w way to add.
    */
   public void addWay(Way w) {
     ways.add(w);

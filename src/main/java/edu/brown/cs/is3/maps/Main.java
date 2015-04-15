@@ -21,7 +21,7 @@ import joptsimple.OptionSpec;
 // TURNS OUT THE DATA ENTRY IN MAPS.SQLITE3 IS THE BIGGEST NIGHTMARE EVER
 // AND ONLY SORT OF GETS YOU THE KIND OF THINGS YOU WOULD WANT
 
-// OPTIMIZATION INCLUDING: REMOVE IMMUTABLE, CHANGE COMPARATOR, BUILD MORE OBJECTS
+// OPTIMIZATION: REMOVE IMMUTABLE, CHANGE COMPARATOR, BUILD MORE OBJECTS
 
 // MAYBE MAKE RADIANLATLNG EXTEND SIMPLE LAT LNG FOR CONVENIENCE
 // DO TONS OF TESTING AND OPTIMIZATION
@@ -77,10 +77,10 @@ public class Main implements Runnable {
    * Prints program usage for interacting with the REPL.
    */
   private static void printREPLUsage() {
-    System.err
-        .println("ERROR: Usage: "
-            + "<lat1> <lon1> <lat2> <lon2> OR "
-            + "<\"Street 1\"> <\"Cross Street 1\"> <\"Street 2\"> <\"Cross Street 2\">");
+    System.err.println("ERROR: Usage: "
+        + "<lat1> <lon1> <lat2> <lon2> OR "
+        + "<\"Street 1\"> <\"Cross Street 1\"> "
+        + "<\"Street 2\"> <\"Cross Street 2\">");
   }
 
   /**
@@ -252,7 +252,7 @@ public class Main implements Runnable {
 
       Server s = new Server(sparkPort, db, traffic, changes);
       s.run();
-      //db.close();
+      // db.close();
     } catch (RuntimeException e) {
       System.err.println(e.getMessage());
       db.close();

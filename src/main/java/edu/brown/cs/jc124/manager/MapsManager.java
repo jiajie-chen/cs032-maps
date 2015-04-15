@@ -53,6 +53,8 @@ public class MapsManager {
    * of traffic through the graph.
    * @param start point.
    * @param end point.
+   * @param traffic a concurrent map updated elsewhere mapping ways to traffic
+   *        values.
    * @return list of ways as a path along the shortest path between the points
    *         or a path with a null list of ways if no path exists.
    */
@@ -92,6 +94,8 @@ public class MapsManager {
    * @param lng1 lng of first point.
    * @param lat2 lat of second point.
    * @param lng2 lng of second point.
+   * @param traffic a concurrent map updated elsewhere mapping ways to traffic
+   *        values.
    * @return list of ways as a path along the shortest path between the points
    *         or a path with a null list of ways if no path exists.
    */

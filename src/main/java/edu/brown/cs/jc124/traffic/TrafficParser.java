@@ -13,7 +13,7 @@ public class TrafficParser {
 
   /**
    * Constructs a traffic parser for a given string.
-   * @param s
+   * @param s traffic update string to parse.
    */
   public TrafficParser(String s) {
     this.s = s;
