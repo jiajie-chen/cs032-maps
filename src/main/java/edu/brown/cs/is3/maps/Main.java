@@ -30,6 +30,7 @@ import joptsimple.OptionSpec;
 
 // TEST PARSING, ISDOUBLE, DB, SYSTEM
 // INCLUDE MULTIPLE COMMAND, SERVER, AND LAT LNG BASED TESTING!
+// SLOW TESTER MAYBE?
 
 /**
  * Main class implementing maps, including shortest path searches, auto
