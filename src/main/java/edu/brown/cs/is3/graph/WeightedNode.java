@@ -43,23 +43,23 @@ public class WeightedNode implements Comparable<WeightedNode> {
     return Double.compare(this.weight, that.weight);
   }
 
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-
-    if (!(obj instanceof WeightedNode)) {
-      return false;
-    }
-
-    WeightedNode w = (WeightedNode) obj;
-
-    return this.ele.equals(w.ele);
-  }
-
-  @Override
-  public int hashCode() {
-    return ele.hashCode();
-  }
+  // @Override
+  // public boolean equals(Object obj) {
+  // if (this == obj) {
+  // return true;
+  // }
+  //
+  // if (!(obj instanceof WeightedNode)) {
+  // return false;
+  // }
+  //
+  // WeightedNode w = (WeightedNode) obj;
+  //
+  // return this.ele.equals(w.ele);
+  // }
+  //
+  // @Override
+  // public int hashCode() {
+  // return ele.hashCode();
+  // }
 }

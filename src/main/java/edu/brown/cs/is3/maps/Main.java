@@ -157,16 +157,16 @@ public class Main implements Runnable {
       return;
     }
 
-    try {
-      manager = new MapsManager(db);
-    } catch (RuntimeException e) {
-      System.err.println("ERROR: " + e.getMessage());
-      return;
-    }
-
     if (options.has("gui")) {
       runSparkServer();
     } else {
+      try {
+        manager = new MapsManager(db, false);
+      } catch (RuntimeException e) {
+        System.err.println("ERROR: " + e.getMessage());
+        return;
+      }
+
       try {
         processQueries();
       } catch (IOException | RuntimeException e) {
