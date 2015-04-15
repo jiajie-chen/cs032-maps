@@ -13,7 +13,7 @@ import edu.brown.cs.is3.cartesian.RadianLatLng;
 public class Node {
   private final String id;
   private final RadianLatLng pos;
-  private Set<String> wayIDs = new HashSet<>(); // maybe use actual objects
+  private Set<Way> ways = new HashSet<>(); // maybe use actual objects
 
   /**
    * Builds a node from an id and a pos.
@@ -63,8 +63,8 @@ public class Node {
   /**
    * @return an list of the ids of the way connected to this node.
    */
-  public Set<String> getWayIDs() {
-    return this.wayIDs; // can be immutable, but trades performance
+  public Set<Way> getWays() {
+    return this.ways; // can be immutable, but trades performance
   }
 
   /**
@@ -72,12 +72,12 @@ public class Node {
    * @param w
    */
   public void addWay(Way w) {
-    wayIDs.add(w.getId());
+    ways.add(w);
   }
 
   @Override
   public String toString() {
-    return "Node: " + id + " Location: " + pos + " Ways: " + wayIDs;
+    return "Node: " + id + " Location: " + pos + " Ways: " + ways;
   }
 
   @Override

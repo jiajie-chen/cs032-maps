@@ -24,6 +24,7 @@ public class Database {
   private final Connection conn;
   private final Map<String, Way> wayById = new HashMap<>();
   private final Map<String, Node> nodeById = new HashMap<>();
+  private final Map<Node, Way> wayByNode = new HashMap<>();
   private final Map<RadianLatLng, Tile> tileByCorner = new HashMap<>();
 
   /**
@@ -85,47 +86,114 @@ public class Database {
    * @param id to search for.
    * @return the node with that id.
    */
+  // public Node nodeOfId(String id) {
+  // if (nodeById.get(id) != null) {
+  // return nodeById.get(id);
+  // }
+  //
+  // Node toReturn;
+  // String nodeQuery =
+  // "SELECT way.id, way.name, way.end FROM way WHERE way.start = ? "
+  // + "UNION SELECT node.id, node.latitude, node.longitude "
+  // + "FROM node WHERE node.id = ? "
+  // + "ORDER BY id;";
+  //
+  // try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery)) {
+  // nodePS.setString(1, id);
+  // nodePS.setString(2, id);
+  //
+  // try (ResultSet nodeRS = nodePS.executeQuery()) {
+  // Double lat;
+  // Double lng;
+  //
+  // if (nodeRS.next()) {
+  // lat = Double.parseDouble(nodeRS.getString(2));
+  // lng = Double.parseDouble(nodeRS.getString(3));
+  // } else {
+  // close();
+  // throw new RuntimeException("No node with that id.");
+  // }
+  //
+  // toReturn = new Node(id, new RadianLatLng(lat, lng));
+  //
+  // while (nodeRS.next()) {
+  // String wayId = nodeRS.getString(1);
+  // String name = nodeRS.getString(2);
+  // String endId = nodeRS.getString(3);
+  //
+  // Way w = new Way(wayId, name, id, endId);
+  // wayById.put(wayId, w);
+  // toReturn.addWay(w);
+  // }
+  //
+  // nodeById.put(id, toReturn);
+  // return toReturn;
+  // }
+  // } catch (SQLException e) {
+  // close();
+  // throw new RuntimeException(e);
+  // }
+  // }
+
   public Node nodeOfId(String id) {
     if (nodeById.get(id) != null) {
       return nodeById.get(id);
     }
 
     Node toReturn;
-    String nodeQuery = "SELECT way.id, way.name, way.end FROM way WHERE way.start = ? "
-        + "UNION "
-        + "SELECT node.id, node.latitude, node.longitude FROM node WHERE node.id = ? "
-        + "ORDER BY id;";
+    String nodeQuery = "SELECT latitude, longitude FROM node WHERE id = ?;";
 
     try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery)) {
       nodePS.setString(1, id);
-      nodePS.setString(2, id);
 
       try (ResultSet nodeRS = nodePS.executeQuery()) {
         Double lat;
         Double lng;
 
         if (nodeRS.next()) {
-          lat = Double.parseDouble(nodeRS.getString(2));
-          lng = Double.parseDouble(nodeRS.getString(3));
+          lat = Double.parseDouble(nodeRS.getString(1));
+          lng = Double.parseDouble(nodeRS.getString(2));
         } else {
           close();
           throw new RuntimeException("No node with that id.");
         }
 
         toReturn = new Node(id, new RadianLatLng(lat, lng));
-
-        while (nodeRS.next()) {
-          String wayId = nodeRS.getString(1);
-          String name = nodeRS.getString(2);
-          String endId = nodeRS.getString(3);
-
-          Way w = new Way(wayId, name, id, endId);
-          wayById.put(wayId, w);
-          toReturn.addWay(w);
-        }
-
         nodeById.put(id, toReturn);
         return toReturn;
+      }
+    } catch (SQLException e) {
+      close();
+      throw new RuntimeException(e);
+    }
+  }
+
+  public Set<Way> waysOfNode(Node n) {
+    if (!n.getWays().isEmpty()) {
+      return n.getWays();
+    }
+
+    String wayQuery = "SELECT id, name, end FROM way WHERE start = ?;";
+
+    try (PreparedStatement wayPS = conn.prepareStatement(wayQuery)) {
+      wayPS.setString(1, n.getId());
+
+      try (ResultSet wayRS = wayPS.executeQuery()) {
+        String wayId;
+        String name;
+        String endID;
+
+        while (wayRS.next()) {
+          wayId = wayRS.getString(1);
+          name = wayRS.getString(2);
+          endID = wayRS.getString(3);
+
+          Way toAdd = new Way(wayId, name, n.getId(), endID);
+          wayById.put(wayId, toAdd);
+          n.addWay(toAdd);
+        }
+
+        return n.getWays();
       }
     } catch (SQLException e) {
       close();
@@ -183,27 +251,25 @@ public class Database {
   public Node nodeOfIntersection(String streetName, String crossName) {
     String interQuery = "SELECT street.start FROM way AS street INNER JOIN way AS cross "
         + "ON street.start = cross.start WHERE "
-        + "(street.name = ? AND cross.name = ?) OR (street.name = ? AND cross.name = ?) "
+        + "(street.name = ? AND cross.name = ?) "
         + "UNION "
         + "SELECT street.start FROM way AS street INNER JOIN way AS cross "
         + "ON street.start = cross.end WHERE "
-        + "(street.name = ? AND cross.name = ?) OR (street.name = ? AND cross.name = ?) "
+        + "(street.name = ? AND cross.name = ?) "
         + "UNION "
         + "SELECT street.end FROM way AS street INNER JOIN way AS cross "
         + "ON street.end = cross.start WHERE "
-        + "(street.name = ? AND cross.name = ?) OR (street.name = ? AND cross.name = ?) "
+        + "(street.name = ? AND cross.name = ?) "
         + "UNION "
         + "SELECT street.end FROM way AS street INNER JOIN way AS cross "
         + "ON street.end = cross.end WHERE "
-        + "(street.name = ? AND cross.name = ?) OR (street.name = ? AND cross.name = ?) "
-        + ";"; // "LIMIT 1;";
+        + "(street.name = ? AND cross.name = ?) "
+        + "LIMIT 1;";
 
     try (PreparedStatement interPS = conn.prepareStatement(interQuery)) {
-      for (int i = 1; i < 17; i += 4) {
-        interPS.setString(i, streetName);
-        interPS.setString(i + 1, crossName);
+      for (int i = 0; i < 8; i += 2) {
+        interPS.setString(i + 1, streetName);
         interPS.setString(i + 2, crossName);
-        interPS.setString(i + 3, streetName);
       }
 
       try (ResultSet interRS = interPS.executeQuery()) {
