@@ -15,17 +15,28 @@ var MapData = function() {
 	this.tiles = {};
 	var TILE_SIZE = 0.10;
 
+	var postSync = function(url, data, success) {
+		$.ajax({
+			type: 'POST',
+			url: url,
+			data: data,
+			success: success,
+			async: false
+		});
+	};
+
 	this.queryTiles = function(tileNWs) {
 		var postParameters = {tiles: JSON.stringify(tileNWs)};
-		console.log(postParameters);
+		//console.log(postParameters);
 
-		$.post("/tile", postParameters, function(responseJSON) {
-			console.log("Received tiles: " + responseJSON);
+		postSync("/tile", postParameters, function(responseJSON) {
+			//console.log("Received tiles: " + responseJSON);
 			var results = JSON.parse(responseJSON);
 			if (results) {
 				var newTiles = results.tiles;
-				for (ids in newTiles) {
-					this.tiles[ids] = newTiles[ids].ways;
+				for (var i = 0; i < newTiles.length; i++) {
+					var key = newTiles[i].nw.lat + ":" + newTiles[i].nw.lng;
+					this.tiles[key] = newTiles[i].ways;
 				}
 			}
 		}.bind(this));
@@ -36,7 +47,7 @@ var MapData = function() {
 
 	this.queryPath = function(url, params) {
 		var results;
-		$.post(url, params, function(responseJSON) {
+		postSync(url, params, function(responseJSON) {
 			console.log("Received path: " + responseJSON);
 			results = JSON.parse(responseJSON);
 			if (results) {
@@ -85,7 +96,7 @@ var MapData = function() {
 	var startPoint = {lat: 0, lng: 0};
 	var endPoint = {lat: 0, lng: 0};
 
-	this.setEndpoints = function(lat, lng) {
+	this.setEndpoint = function(lat, lng) {
 		if (currEnd == 0) {
 			startPoint.lat = lat;
 			startPoint.lng = lng;
@@ -155,8 +166,6 @@ var MapData = function() {
 	};
 
 	this.getWays = function(sLat, sLng, eLat, eLng) {
-		console.log(sLat);
-		console.log(sLng);
 		var toReturn = new Array();
 		var tileIDs = this.getTiles(sLat, sLng, eLat, eLng);
 		for (var i = 0; i < tileIDs.length; i++) {
@@ -167,8 +176,6 @@ var MapData = function() {
 				toReturn.push(w);
 			}
 		}
-
-		console.log(toReturn);
 
 		return toReturn;
 	};
@@ -192,15 +199,17 @@ var MapDrawer = function(canvasElement, mData) {
 	this.canvas = canvasElement;
 	this.context = this.canvas.getContext("2d");
 	// context width, height
-	var cWi = this.canvas.width;
-	var cHi = this.canvas.height;
+	var cWi = $(this.canvas).width();
+	var cHi = $(this.canvas).height();
+	this.canvas.width = cWi;
+	this.canvas.height = cHi;
 	// map data
 	this.mapData = mData;
 
 	// projection radius for cartesian conversion
-	var PROJ_RADIUS = 1;
+	var PROJ_RADIUS = 100;
 	// road line radius (when viewport width/height matches)
-	var LINE_WIDTH = 2;
+	var LINE_WIDTH = 3;
 
 	//viewport (canvas), in terms of cartesian coordinates
 	this.viewport = {
@@ -218,11 +227,11 @@ var MapDrawer = function(canvasElement, mData) {
 			width: cWi,
 			height: cHi,
 
-			minWidth: cWi / 10,
-			minHeight: cHi / 10,
+			minWidth: cWi / PROJ_RADIUS,
+			minHeight: cHi / PROJ_RADIUS,
 
-			maxWidth: cWi * 10,
-			maxHeight: cHi * 10
+			maxWidth: cWi * PROJ_RADIUS,
+			maxHeight: cHi * PROJ_RADIUS
 		}
 	};
 
@@ -239,7 +248,7 @@ var MapDrawer = function(canvasElement, mData) {
 	};
 
 	this.cartToLatLng = function(x, y) {
-		// lng = x/R
+		// lng = x / R
 		var lng = x / PROJ_RADIUS;
 		// lat = 2 * atan((y/R)^e) - pi/2
 		var lat = 2 * Math.atan(Math.exp(y / PROJ_RADIUS)) - (Math.PI/2);
@@ -301,18 +310,20 @@ var MapDrawer = function(canvasElement, mData) {
 		var x1 = (cart.x - this.viewport.origin.x) * (cWi / this.viewport.size.width);
 		var y1 = -(cart.y - this.viewport.origin.y) * (cHi / this.viewport.size.height);
 		var x2 = x1;
-		var y2 = y1 - (LINE_WIDTH * 3);
+		var y2 = y1 - (LINE_WIDTH * 5);
 
-		this.context.arc(x2, y2, LINE_WIDTH, 0, 2 * Math.PI, false);
-		this.context.fillStyle = color;
-		this.context.fill();
-
+		this.context.beginPath();
 		this.context.lineJoin = "round";
 		this.context.moveTo(x1, y1);
 		this.context.lineTo(x2, y2);
 		this.context.strokeStyle = "black";
 		this.context.lineWidth = LINE_WIDTH;
 		this.context.stroke();
+
+		this.context.beginPath();
+		this.context.arc(x2, y2, LINE_WIDTH * 2, 0, 2 * Math.PI);
+		this.context.fillStyle = color;
+		this.context.fill();
 	};
 
 	this.drawWay = function(sLat, sLng, eLat, eLng, color) {
@@ -327,6 +338,7 @@ var MapDrawer = function(canvasElement, mData) {
 		// formula for road width (the more zoomed out, the smaller the roads)
 		var lW = Math.max(0.5, LINE_WIDTH * (cWi / this.viewport.size.width));
 
+		this.context.beginPath();
 		this.context.lineJoin = "round";
 		this.context.moveTo(x1, y1);
 		this.context.lineTo(x2, y2);
@@ -340,7 +352,7 @@ var MapDrawer = function(canvasElement, mData) {
 
 		// get all ways in bounding box, and draw them
 		var sLatLng = this.cartToLatLng(this.viewport.origin.x, this.viewport.origin.y);
-		var eLatLng = this.cartToLatLng(this.viewport.origin.x + this.viewport.size.height, this.viewport.origin.y - this.viewport.size.height);
+		var eLatLng = this.cartToLatLng(this.viewport.origin.x + this.viewport.size.width, this.viewport.origin.y - this.viewport.size.height);
 		var ways = this.mapData.getWays(sLatLng.lat, sLatLng.lng, eLatLng.lat, eLatLng.lng);
 		for (var i = 0; i < ways.length; i++) {
 			var w = ways[i];
@@ -378,6 +390,7 @@ var Map = function(canvasId) {
 	};
 
 	this.mapScroll = function(upScroll) {
+		console.log("scrolling");
 		var s = 90/100; // scroll down, scale in
 		if (upScroll) {
 			s = 110/100; // scroll up, scale out
@@ -386,23 +399,25 @@ var Map = function(canvasId) {
 		drawer.scaleView(s);
 	};
 	this.mapDrag = function(sX, sY, eX, eY) {
+		console.log("dragging");
 		// convert to cartesian deltas
-		var dx = eX - sX;
-		var dy = -(eY - sY);
+		var dx = -(eX - sX);
+		var dy = (eY - sY);
 
 		drawer.translateView(dx, dy);
 	};
 	this.mapClick = function(x, y) {
+		console.log("clicking");
 		// convert to cartesian, on the map
-		var cx = drawer.viewport.origin.x + x;
-		var cy = drawer.viewport.origin.y - y;
+		var cx = drawer.viewport.origin.x + (y * drawer.viewport.size.height / cWi);
+		var cy = drawer.viewport.origin.y - (y * drawer.viewport.size.height / cHi);
 		// convert to latlng
 		var latlng = drawer.cartToLatLng(cx, cy);
 
 		mapData.setEndpoint(latlng.lat, latlng.lng);
 	};
 
-	var DRAG_DIST = 5; // drag threshold
+	var DRAG_DIST = 1; // drag threshold
 	var overCanvas = false;
 	var startClick = {started: false, clicked: false, x:0, y:0};
 	var mapMouseStart = function(mouseEvent) {
@@ -429,21 +444,27 @@ var Map = function(canvasId) {
 		}
 	};
 	var mapMouseStop = function(mouseEvent) {
-		if (startClick.clicked) {
-			this.mapClick(startClick.x, startClick.y);
-		}
+		var oldClicked = startClick.clicked;
 		startClick.clicked = false;
 		startClick.started = false;
+
+		if (oldClicked) {
+			this.mapClick(startClick.x, startClick.y);
+		}
 	};
 	var mapMouseIn = function(mouseEvent) {
+		startClick.clicked = false;
+		startClick.started = false;
 		overCanvas = true;
 	};
 	var mapMouseOut = function(mouseEvent) {
+		startClick.clicked = false;
+		startClick.started = false;
 		overCanvas = false;
 	};
 	var mapMouseWheel = function(mouseEvent) {
 		if (overCanvas) {
-			if (event.originalEvent.wheelDelta > 0 || event.originalEvent.detail < 0) {
+			if (event.wheelDelta > 0 || event.detail < 0) {
 				// scroll up
 				this.mapScroll(true);
 			} else {
@@ -461,14 +482,14 @@ var Map = function(canvasId) {
 	.bind('mousewheel DOMMouseScroll', mapMouseWheel.bind(this));
 
 	this.beginUpdating = function() {
-		// requestAnimationFrame(this.beginUpdating.bind(this));
+		requestAnimationFrame(this.beginUpdating.bind(this));
 		mapData.queryTraffic();
 		drawer.drawView();
 	};
 
 	// move to beginning latlng
 	var startOrigin = drawer.latlngToCart(41 * toRad, -71 * toRad);
-	drawer.translateView(startOrigin.x, startOrigin.y);
+	// drawer.translateView(startOrigin.x, startOrigin.y);
 	// begin drawing/polling loop
 	this.beginUpdating();
 };

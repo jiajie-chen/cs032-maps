@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -210,12 +211,11 @@ public class Server implements Runnable {
       Type listType = new TypeToken<ArrayList<RadianLatLng>>() {} .getType();
       List<RadianLatLng> nwCorners = new Gson().fromJson(jsonTiles, listType);
       
-      ImmutableMap.Builder<String, Tile> tiles = new ImmutableMap.Builder<String, Tile>();
+      ImmutableList.Builder<Tile> tiles = new ImmutableList.Builder<Tile>();
       for (RadianLatLng c : nwCorners) {
-        String tID = c.getLat() + ":" + c.getLng();
-        tiles.put(tID, m.getTile(c, TILE_SIZE));
+        tiles.add(m.getTile(c, TILE_SIZE));
       }
-      Map<String, Tile> toSend = tiles.build();
+      List<Tile> toSend = tiles.build();
       
       Map<String, Object> variables = new ImmutableMap.Builder<String, Object>()
           .put("tiles", toSend).build();
