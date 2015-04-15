@@ -51,6 +51,7 @@ public class Server implements Runnable {
     Spark.post("/point", new PointHandler());
     // Spark.post("/tile", new TileHandler());
     // Spark.get("/traffic", new GetHandler(), new FreeMarkerEngine());
+    Spark.post("/changes", new ChangesHandler());
   }
 
   /**
@@ -182,6 +183,26 @@ public class Server implements Runnable {
 
       Map<String, Object> variables = new ImmutableMap.Builder<String, Object>()
           .put("path", toReturn).build();
+
+      return gson.toJson(variables);
+    }
+  }
+
+  /**
+   * Handles suggestion requests for auto correction.
+   * @author is3
+   *
+   */
+  private class ChangesHandler implements Route {
+
+    @Override
+    public Object handle(final Request req, final Response res) {
+      QueryParamsMap qm = req.queryMap();
+      Map<String, Double> toSend = ImmutableMap.copyOf(changes);
+      changes.clear();
+
+      Map<String, Object> variables = new ImmutableMap.Builder<String, Object>()
+          .put("changes", toSend).build();
 
       return gson.toJson(variables);
     }
