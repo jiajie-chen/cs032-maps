@@ -33,6 +33,11 @@ public class Graph {
     this.traffic = null;
   }
 
+  /**
+   * Builds a traffic enabled graph from a database and a traffic map.
+   * @param db allowing access to nodes and ways.
+   * @param traffic mapping ways to traffic values.
+   */
   public Graph(Database db, Map<String, Double> traffic) {
     this.db = db;
     this.traffic = traffic;
@@ -52,8 +57,6 @@ public class Graph {
     if (start.equals(end)) {
       throw new RuntimeException("Those are the same node, silly!");
     }
-
-    this.start = start;
 
     if (traffic != null) {
       return trafficDijkstras(start, end);

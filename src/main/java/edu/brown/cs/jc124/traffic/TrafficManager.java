@@ -9,6 +9,12 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Creates a server which loops continously and gathers and relays information
+ * about traffic.
+ * @author is3
+ *
+ */
 public class TrafficManager implements Runnable {
   private long unixTime;
   private final int serverPort;
@@ -17,6 +23,12 @@ public class TrafficManager implements Runnable {
   private static final String BASE_URL = "http://localhost";
   private static final long MS_DELAY = 250;
 
+  /**
+   * Builds a traffic manager to collect traffic data.
+   * @param serverPort port of traffic server from which to collect.
+   * @param traffic synchronized map in which to store cumulative results.
+   * @param changes synchronized map in which to store temporary results.
+   */
   public TrafficManager(int serverPort,
       Map<String, Double> traffic, Map<String, Double> changes) {
 
@@ -43,6 +55,10 @@ public class TrafficManager implements Runnable {
     }
   }
 
+  /**
+   * Pings the traffic server and updates the traffic map based on the current
+   * unix time. The first update is run with time zero.
+   */
   private void update() {
     try {
       URL query = new URL(BASE_URL + ":" + serverPort + "?last=" + unixTime);

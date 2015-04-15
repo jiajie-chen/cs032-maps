@@ -1,5 +1,5 @@
 /**
- * 
+ * Managers to compactly collect the functions of packages.
  */
 /**
  * @author jchen

@@ -7,31 +7,53 @@ import edu.brown.cs.is3.maps.Node;
 import edu.brown.cs.is3.maps.Way;
 
 /**
- * @author jchen Represents a path from a start node to end node, by ways, in a
- *         map graph.
+ * @author jchen
+ * 
+ *         Represents a path from a start node to end node, by ways, in a map
+ *         graph.
  */
 public class Path { // SHOULD MAYBE USE COMPACT WAYS
-  private Node start, end;
+  private final Node start, end;
   private List<Way> path;
 
+  /**
+   * Builds a path from one point to another out of ways.
+   * @param start node that starts path.
+   * @param end node that ends path.
+   * @param path list of ways that from path.
+   */
   public Path(Node start, Node end, List<Way> path) {
     this(start, end);
     this.path = Collections.unmodifiableList(path);
   }
 
+  /**
+   * Builds a null path.
+   * @param start node.
+   * @param end node.
+   */
   public Path(Node start, Node end) {
     this.start = start;
     this.end = end;
   }
 
+  /**
+   * @return start node.
+   */
   public Node getStart() {
     return start;
   }
 
+  /**
+   * @return end node.
+   */
   public Node getEnd() {
     return end;
   }
 
+  /**
+   * @return the list of ways.
+   */
   public List<Way> getPath() {
     return path;
   }

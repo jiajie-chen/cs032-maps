@@ -82,59 +82,64 @@ public class Database {
   }
 
   /**
-   * Searches for and returns the node with the given id;
+   * Searches for and returns the node with the given id including its ways.
    * @param id to search for.
    * @return the node with that id.
    */
-  // public Node nodeOfId(String id) {
-  // if (nodeById.get(id) != null) {
-  // return nodeById.get(id);
-  // }
-  //
-  // Node toReturn;
-  // String nodeQuery =
-  // "SELECT way.id, way.name, way.end FROM way WHERE way.start = ? "
-  // + "UNION SELECT node.id, node.latitude, node.longitude "
-  // + "FROM node WHERE node.id = ? "
-  // + "ORDER BY id;";
-  //
-  // try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery)) {
-  // nodePS.setString(1, id);
-  // nodePS.setString(2, id);
-  //
-  // try (ResultSet nodeRS = nodePS.executeQuery()) {
-  // Double lat;
-  // Double lng;
-  //
-  // if (nodeRS.next()) {
-  // lat = Double.parseDouble(nodeRS.getString(2));
-  // lng = Double.parseDouble(nodeRS.getString(3));
-  // } else {
-  // close();
-  // throw new RuntimeException("No node with that id.");
-  // }
-  //
-  // toReturn = new Node(id, new RadianLatLng(lat, lng));
-  //
-  // while (nodeRS.next()) {
-  // String wayId = nodeRS.getString(1);
-  // String name = nodeRS.getString(2);
-  // String endId = nodeRS.getString(3);
-  //
-  // Way w = new Way(wayId, name, id, endId);
-  // wayById.put(wayId, w);
-  // toReturn.addWay(w);
-  // }
-  //
-  // nodeById.put(id, toReturn);
-  // return toReturn;
-  // }
-  // } catch (SQLException e) {
-  // close();
-  // throw new RuntimeException(e);
-  // }
-  // }
+  public Node slowNodeOfId(String id) {
+    if (nodeById.get(id) != null) {
+      return nodeById.get(id);
+    }
 
+    Node toReturn;
+    String nodeQuery =
+        "SELECT way.id, way.name, way.end FROM way WHERE way.start = ? "
+            + "UNION SELECT node.id, node.latitude, node.longitude "
+            + "FROM node WHERE node.id = ? "
+            + "ORDER BY id;";
+
+    try (PreparedStatement nodePS = conn.prepareStatement(nodeQuery)) {
+      nodePS.setString(1, id);
+      nodePS.setString(2, id);
+
+      try (ResultSet nodeRS = nodePS.executeQuery()) {
+        Double lat;
+        Double lng;
+
+        if (nodeRS.next()) {
+          lat = Double.parseDouble(nodeRS.getString(2));
+          lng = Double.parseDouble(nodeRS.getString(3));
+        } else {
+          close();
+          throw new RuntimeException("No node with that id.");
+        }
+
+        toReturn = new Node(id, new RadianLatLng(lat, lng));
+
+        while (nodeRS.next()) {
+          String wayId = nodeRS.getString(1);
+          String name = nodeRS.getString(2);
+          String endId = nodeRS.getString(3);
+
+          Way w = new Way(wayId, name, id, endId);
+          wayById.put(wayId, w);
+          toReturn.addWay(w);
+        }
+
+        nodeById.put(id, toReturn);
+        return toReturn;
+      }
+    } catch (SQLException e) {
+      close();
+      throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Returns the node with the given id without pulling ways.
+   * @param id of node to examine.
+   * @return the node with the given id.
+   */
   public Node nodeOfId(String id) {
     if (nodeById.get(id) != null) {
       return nodeById.get(id);
@@ -168,6 +173,12 @@ public class Database {
     }
   }
 
+  /**
+   * Produces all of the ways emanating from a given node and fills in that
+   * node.
+   * @param n node to examine.
+   * @return the set of ways starting at n.
+   */
   public Set<Way> waysOfNode(Node n) {
     if (!n.getWays().isEmpty()) {
       return n.getWays();

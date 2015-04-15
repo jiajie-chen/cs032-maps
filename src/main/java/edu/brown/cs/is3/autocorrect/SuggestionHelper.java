@@ -46,7 +46,7 @@ public class SuggestionHelper {
   }
 
   /**
-   * Given a list of words, returns the auto correction suggestions
+   * Given a list of words, returns the auto correction suggestions.
    *
    * @param words array to correct.
    * @return list of suggestions for what the user might have meant by words.

@@ -25,8 +25,6 @@ public class Way {
     this.endId = endId;
   }
 
-  // public Way() // Maybe another constructor using actual objects not id
-
   /**
    * @return id of way.
    */
