@@ -183,27 +183,25 @@ public class Database {
   public Node nodeOfIntersection(String streetName, String crossName) {
     String interQuery = "SELECT street.start FROM way AS street INNER JOIN way AS cross "
         + "ON street.start = cross.start WHERE "
-        + "(street.name = ? AND cross.name = ?) OR (street.name = ? AND cross.name = ?) "
+        + "(street.name = ? AND cross.name = ?) "
         + "UNION "
         + "SELECT street.start FROM way AS street INNER JOIN way AS cross "
         + "ON street.start = cross.end WHERE "
-        + "(street.name = ? AND cross.name = ?) OR (street.name = ? AND cross.name = ?) "
+        + "(street.name = ? AND cross.name = ?) "
         + "UNION "
         + "SELECT street.end FROM way AS street INNER JOIN way AS cross "
         + "ON street.end = cross.start WHERE "
-        + "(street.name = ? AND cross.name = ?) OR (street.name = ? AND cross.name = ?) "
+        + "(street.name = ? AND cross.name = ?) "
         + "UNION "
         + "SELECT street.end FROM way AS street INNER JOIN way AS cross "
         + "ON street.end = cross.end WHERE "
-        + "(street.name = ? AND cross.name = ?) OR (street.name = ? AND cross.name = ?) "
-        + ";"; // "LIMIT 1;";
+        + "(street.name = ? AND cross.name = ?) "
+        + "LIMIT 1;";
 
     try (PreparedStatement interPS = conn.prepareStatement(interQuery)) {
-      for (int i = 1; i < 17; i += 4) {
-        interPS.setString(i, streetName);
-        interPS.setString(i + 1, crossName);
+      for (int i = 0; i < 8; i += 2) {
+        interPS.setString(i + 1, streetName);
         interPS.setString(i + 2, crossName);
-        interPS.setString(i + 3, streetName);
       }
 
       try (ResultSet interRS = interPS.executeQuery()) {

@@ -12,6 +12,7 @@ import edu.brown.cs.is3.cartesian.DistanceToComparator;
 import edu.brown.cs.is3.maps.Database;
 import edu.brown.cs.is3.maps.Node;
 import edu.brown.cs.is3.maps.Way;
+import edu.brown.cs.is3.maps.WeightedNode;
 
 // should probably be using squared distances!!!!!!!!!!!!!!!!!!!!!!!!!
 /**
@@ -60,31 +61,36 @@ public class Graph {
     }
 
     Map<Node, Double> distances = new HashMap<>(); // the distances list (g)
-    PriorityQueue<Node> open = new PriorityQueue<>(
-        new DistanceToComparator(end, distances)); // the open list (by f)
+    PriorityQueue<WeightedNode> open =
+        new PriorityQueue<>(); // the open list (by f)
     Set<Node> closed = new HashSet<>(); // the explored list
     Map<Node, Way> parents = new HashMap<>(); // (node, way to node)
 
     distances.put(start, 0.0);
-    open.add(start);
+    open.add(new WeightedNode(start, 0.0));
     parents.put(start, null);
 
     while (!open.isEmpty()) {
-      Node curr = open.poll();
+      Node curr = open.poll().getEle();
+      double currDistance = distances.get(curr);
 
       if (curr.equals(end)) {
         return generateSolution(curr, parents);
       }
 
       closed.add(curr);
+      Set<String> edges = curr.getWayIDs();
 
-      for (String wayId : curr.getWayIDs()) {
+      for (String wayId : edges) {
         Way w = db.wayOfId(wayId);
         Node next = db.nodeOfId(w.getEndId());
 
         if (!closed.contains(next)) {
-          distances.put(next, distances.get(curr) + curr.getDistance(next));
-          open.add(next);
+          double nextDist = currDistance + curr.getDistance(next); // g
+          double nextTotal = nextDist + next.getDistance(end); // f
+
+          distances.put(next, nextDist);
+          open.add(new WeightedNode(next, nextTotal));
           parents.put(next, w);
         }
       }
@@ -128,7 +134,7 @@ public class Graph {
 
         if (!closed.contains(next)) {
           distances.put(next, distances.get(curr)
-              + traffic.getOrDefault(wayId, 1.0) * curr.getDistance(next));
+              + (traffic.getOrDefault(wayId, 1.0) * curr.getDistance(next)));
           open.add(next);
           parents.put(next, w);
         }
