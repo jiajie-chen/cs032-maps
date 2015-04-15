@@ -29,12 +29,16 @@ public class Server implements Runnable {
   private final int port;
   private final Gson gson = new Gson();
   private final Map<String, Double> traffic;
+  private final Map<String, Double> changes;
   private static final double TILE_SIZE = .01;
 
-  public Server(int port, Database db, Map<String, Double> traffic) {
+  public Server(int port, Database db,
+      Map<String, Double> traffic, Map<String, Double> changes) {
+
     this.m = new MapsManager(db);
     this.port = port;
     this.traffic = traffic;
+    this.changes = changes;
   }
 
   @Override
@@ -46,6 +50,7 @@ public class Server implements Runnable {
     Spark.post("/intersection", new IntersectionHandler());
     Spark.post("/point", new PointHandler());
     // Spark.post("/tile", new TileHandler());
+    // Spark.get("/traffic", new GetHandler(), new FreeMarkerEngine());
   }
 
   /**

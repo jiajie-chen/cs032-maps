@@ -244,12 +244,13 @@ public class Main implements Runnable {
    */
   private void runSparkServer() {
     try {
-      Map<String, Double> traffic = new ConcurrentHashMap();
+      Map<String, Double> traffic = new ConcurrentHashMap<>();
+      Map<String, Double> changes = new ConcurrentHashMap<>();
 
-      Thread t = new Thread(new TrafficManager(trafficPort, traffic));
+      Thread t = new Thread(new TrafficManager(trafficPort, traffic, changes));
       t.start();
 
-      Server s = new Server(sparkPort, db, traffic);
+      Server s = new Server(sparkPort, db, traffic, changes);
       s.run();
       db.close();
     } catch (RuntimeException e) {
