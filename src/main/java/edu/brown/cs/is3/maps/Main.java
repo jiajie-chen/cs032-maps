@@ -194,17 +194,18 @@ public class Main implements Runnable {
       Map<String, Double> traffic = new ConcurrentHashMap<>();
       Map<String, Double> changes = new ConcurrentHashMap<>();
 
-      Thread t = new Thread(new TrafficManager(trafficPort, traffic, changes));
-      // t.start();
-
       Server s = new Server(sparkPort, db, traffic, changes);
       s.run();
+      
+      Thread t = new Thread(new TrafficManager(trafficPort, traffic, changes));
+      t.start();
+
       // db.close();
     } catch (RuntimeException e) {
       System.err.println("ERROR: " + e.getMessage());
       return;
     } finally {
-      db.close();
+      // db.close();
     }
   }
 }

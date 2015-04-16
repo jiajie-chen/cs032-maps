@@ -34,11 +34,13 @@
       <datalist class="suggestionList" id="eCrossList">
       </datalist>
 
-  </div>
+      <button id="submit">Find</button>
 
-  <div id="mainDiv">
-    <canvas id="mapCanvas"></canvas>
-  </div>
+    </div>
+
+    <div id="mainDiv">
+      <canvas id="mapCanvas"></canvas>
+    </div>
 
   </body>
 </html>

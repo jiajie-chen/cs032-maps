@@ -44,6 +44,7 @@ public class TrafficManager implements Runnable {
   public void run() {
 
     while (true) {
+
       try {
         TimeUnit.MILLISECONDS.sleep(MS_DELAY);
       } catch (InterruptedException e) {
@@ -70,6 +71,7 @@ public class TrafficManager implements Runnable {
         String s = r.readLine();
         while (s != null) {
           TrafficParser tp = new TrafficParser(s);
+
           Map<String, Double> newChanges = tp.parse();
           recentChanges.putAll(newChanges);
           trafficById.putAll(newChanges); // TODO

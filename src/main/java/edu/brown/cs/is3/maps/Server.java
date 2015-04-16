@@ -35,6 +35,7 @@ public class Server implements Runnable {
   private final Map<String, Double> traffic;
   private final Map<String, Double> changes;
   private static final double TILE_SIZE = .01;
+  private static final Path NULL_PATH = new Path(null, null);
 
   /**
    * Builds a server.
@@ -147,11 +148,15 @@ public class Server implements Runnable {
         endStreet = gson.fromJson(qm.value("endStreet"), String.class);
         endCross = gson.fromJson(qm.value("endCross"), String.class);
 
-        toReturn = m.getPathByIntersections(
-            startStreet, startCross, endStreet, endCross, traffic);
+        try {
+          toReturn = m.getPathByIntersections(
+              startStreet, startCross, endStreet, endCross, traffic);
+        } catch (RuntimeException e) {
+          toReturn = NULL_PATH;
+        }
       } else {
         // TODO
-        toReturn = null;
+        toReturn = NULL_PATH;
       }
 
       Map<String, Object> variables = new ImmutableMap.Builder<String, Object>()
@@ -189,13 +194,17 @@ public class Server implements Runnable {
         double endLat = gson.fromJson(qm.value("endLat"), Double.class);
         double endLng = gson.fromJson(qm.value("endLng"), Double.class);
 
-        toReturn = m.getPathByPoints(
-            startLat, startLng,
-            endLat, endLng,
-            traffic);
+        try {
+          toReturn = m.getPathByPoints(
+              startLat, startLng,
+              endLat, endLng,
+              traffic);
+        } catch (RuntimeException e) {
+          toReturn = NULL_PATH;
+        }
       } else {
         // TODO
-        toReturn = null;
+        toReturn = NULL_PATH;
       }
 
       Map<String, Object> variables = new ImmutableMap.Builder<String, Object>()
