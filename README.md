@@ -6,7 +6,7 @@ Maps
 
 Jiaje Chen's (jc124) KDTree and Ian Stewart's (is3) Bacon and Autocorrect were used.
 
-Our project has one known bug in which certain portions of the path do not appropriately highlight after it has been sent from the frontend.
+Our project has one known bug in which certain portions of the path do not appropriately highlight after it has been sent from the front end. There are also some problems with the street query from the front end.
 
 Our project is run through main, which parses options from the command line and uses them to generate a database, a SuggestionHelper, a KDTree, and a MapsManager, which contain the functions to search the database and perform the various kinds of queries needed to run maps.
 

@@ -13,8 +13,8 @@ public class CompactPath {
   private final List<CompactWay> path;
 
   /**
-   * Builds
-   * @param path
+   * Builds a compact path for easy transmission.
+   * @param path compact path to send.
    */
   public CompactPath(List<CompactWay> path) {
     this.path = Collections.unmodifiableList(path);
