@@ -115,27 +115,24 @@ var MapData = function() {
 	};
 
 	this.pathIDs = {};
-	// var querySuccess = false;
 
 	this.queryPath = function(url, params) {
+		this.pathSuccess = false;
 		var results;
 		postAsync(url, params, function(responseJSON) {
 			console.log("Received path: " + responseJSON);
 			results = JSON.parse(responseJSON);
 			if (results) {
-				this.pathIDs = new Array();
+				this.pathIDs = {};
 				var path = results.path;
 				if (path && path.path) {
 					var ways = path.path;
 					for (var i = 0; i < ways.length; i++) {
-						var w = ways[i];
 						this.pathIDs[ways[i].id] = "cyan";
 					}
 				}
 			}
 		}.bind(this));
-
-		console.log(this.pathIDs);
 	};
 
 	this.queryIntersection = function(sStreet, sCross, eStreet, eCross) {
@@ -175,8 +172,8 @@ var MapData = function() {
 	};
 
 	var currEnd = 0;
-	var startPoint = {x: 0, y: 0, active: false};
-	var endPoint = {x: 0, y: 0, active: false};
+	var startPoint = {lat: 0, lng: 0, active: false};
+	var endPoint = {lat: 0, lng: 0, active: false};
 
 	this.setEndpoint = function(lat, lng) {
 		if (currEnd == 0) {
@@ -236,9 +233,11 @@ var MapData = function() {
 		var tileIDs = this.getTiles(sLat, sLng, eLat, eLng);
 		for (var i = 0; i < tileIDs.length; i++) {
 			var ways = this.tiles[tileIDs[i]];
-			for (var j = 0; j < ways.length; j++) {
-				var w = ways[j];
-				toReturn.push(w);
+			if (ways) {
+				for (var j = 0; j < ways.length; j++) {
+					var w = ways[j];
+					toReturn.push(w);
+				}
 			}
 		}
 
@@ -254,10 +253,6 @@ var MapData = function() {
 		return path.path;
 	};
 	*/
-
-	this.getPathBounds = function() {
-
-	};
 };
 
 var MapDrawer = function(canvasElement, mData) {
@@ -399,7 +394,7 @@ var MapDrawer = function(canvasElement, mData) {
 		var s = MapUtil.cartToScreen(sx, sy, this.viewport, this.cWi, this.cHi);
 		var e = MapUtil.cartToScreen(ex, ey, this.viewport, this.cWi, this.cHi);
 		// formula for road width (the more zoomed out, the smaller the roads)
-		var lW = LINE_WIDTH; //Math.max(0.5, LINE_WIDTH * (this.cWi / this.viewport.size.width));
+		var lW = LINE_WIDTH;
 
 		var pathColor = mapData.pathIDs[wID];
 		if (pathColor) {
@@ -465,7 +460,6 @@ var Map = function(canvasId) {
 	this.queryIntersection = function(sStreet, sCross, eStreet, eCross) {
 		console.log(sStreet, sCross, eStreet, eCross);
 		mapData.queryIntersection(sStreet, sCross, eStreet, eCross);
-		// var bounds = mapData.getPathBounds();
 	};
 
 	this.mapScroll = function(upScroll) {
