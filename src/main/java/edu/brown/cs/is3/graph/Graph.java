@@ -87,7 +87,8 @@ public class Graph {
         Node next = db.nodeOfId(w.getEndId());
 
         if (!closed.contains(next)) {
-          double nextDist = currDistance + curr.getDistance(next); // g
+          double nextDist =
+              currDistance + curr.getDistance(next); // g
           double oldNextDist =
               distances.getOrDefault(next, Double.MAX_VALUE); // old g
 
@@ -101,7 +102,7 @@ public class Graph {
       }
     }
 
-    return new Path(start, end); // path with no ways
+    return new Path(start, end); // path with no ways if not found
   }
 
   /**
