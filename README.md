@@ -22,3 +22,5 @@ Our code can be compiled and tested with:
 	mvn clean package && cs032_system_tester_slow -t 20 ./run tests/*
 And run from the command line with:
 	./run [--gui] [--port <int>] [--tport <int>] <db>
+
+As of now, we have five CheckStyle errors. Four of them relate to GSONs type analysis functions, which lead to empty brackets about which CheckStyle complains. The last is from a default method, which CheckSyle doesn't recognize because default methods are so new.

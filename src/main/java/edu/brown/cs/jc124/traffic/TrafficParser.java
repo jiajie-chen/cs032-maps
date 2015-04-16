@@ -9,8 +9,6 @@ import java.util.Map;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import edu.brown.cs.is3.cartesian.RadianLatLng;
-
 /**
  * Parses traffic information into a map from way ids to traffic values.
  * @author is3
@@ -33,7 +31,7 @@ public class TrafficParser {
    */
   public Map<String, Double> parse() {
     Map<String, Double> toReturn = new HashMap<>();
-    
+
     Type listType =
         new TypeToken<ArrayList<ArrayList<String>>>() {
         }.getType();
@@ -42,10 +40,10 @@ public class TrafficParser {
     for (List<String> eles : pairs) {
       String id = eles.get(0);
       double traffic = Double.parseDouble(eles.get(1));
-      
+
       toReturn.put(id, traffic);
     }
-    
+
     return toReturn;
   }
 

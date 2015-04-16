@@ -230,13 +230,13 @@ public class Server implements Runnable {
           new TypeToken<ArrayList<RadianLatLng>>() {
           }.getType();
       List<RadianLatLng> nwCorners = new Gson().fromJson(jsonTiles, listType);
-      
+
       ImmutableList.Builder<Tile> tiles = new ImmutableList.Builder<Tile>();
       for (RadianLatLng c : nwCorners) {
         tiles.add(m.getTile(c, TILE_SIZE));
       }
       List<Tile> toSend = tiles.build();
-      
+
       Map<String, Object> variables = new ImmutableMap.Builder<String, Object>()
           .put("tiles", toSend).build();
 

@@ -35,9 +35,7 @@ public class WeightedNode implements Comparable<WeightedNode> {
     return weight;
   }
 
-  /**
-   * NOTE: Comparator does not match equals.
-   */
+  // NOTE: Comparator does not match equals.
   @Override
   public int compareTo(WeightedNode that) {
     return Double.compare(this.weight, that.weight);

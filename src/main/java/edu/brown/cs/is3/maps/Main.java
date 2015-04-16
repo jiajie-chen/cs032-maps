@@ -196,7 +196,7 @@ public class Main implements Runnable {
 
       Server s = new Server(sparkPort, db, traffic, changes);
       s.run();
-      
+
       Thread t = new Thread(new TrafficManager(trafficPort, traffic, changes));
       t.start();
 
@@ -205,6 +205,7 @@ public class Main implements Runnable {
       System.err.println("ERROR: " + e.getMessage());
       return;
     } finally {
+      System.out.println();
       // db.close();
     }
   }
