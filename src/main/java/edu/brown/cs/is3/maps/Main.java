@@ -40,6 +40,12 @@ import joptsimple.OptionSpec;
 // STYLE
 // SERVER STABILITY
 
+// TODO
+
+// TRAFFIC
+// STYLE/FINDBUGS
+// STREETS
+
 /**
  * Main class implementing maps, including shortest path searches, auto
  * correction, and nearest neighbor searches based on both the command line and
