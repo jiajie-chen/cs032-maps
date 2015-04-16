@@ -356,7 +356,7 @@ public class Database {
 
     Set<CompactWay> ways = new HashSet<>();
 
-    String wayQuery = " SELECT w.id, s.latitude, s.longitude, w.end "
+    String wayQuery = "SELECT w.id, s.latitude, s.longitude, w.end "
         + "FROM way AS w INNER JOIN node AS s ON w.start = s.id "
         + "WHERE  (s.latitude <= ? AND s.latitude >= ? "
         + "AND s.longitude >= ? AND s.longitude <= ?) "
@@ -373,9 +373,7 @@ public class Database {
       }
 
       try (ResultSet wayRS = wayPS.executeQuery()) {
-
         while (wayRS.next()) {
-
           RadianLatLng start = new RadianLatLng(
               Double.parseDouble(wayRS.getString(SECOND)),
               Double.parseDouble(wayRS.getString(THIRD)));

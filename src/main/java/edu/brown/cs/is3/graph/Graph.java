@@ -59,11 +59,11 @@ public class Graph {
     }
 
     this.pathStart = start;
-
+    /*
     if (traffic != null) {
       return trafficDijkstras(start, end);
     }
-
+    */
     Map<Node, Double> distances = new HashMap<>(); // the distances list (g)
     PriorityQueue<WeightedNode> open =
         new PriorityQueue<>(); // the open list (by f)

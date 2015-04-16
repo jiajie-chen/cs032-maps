@@ -2,6 +2,10 @@ var Autocorrect = function(inputID, listID) {
 	this.inputElement = document.getElementById(inputID);
 	this.listElement = document.getElementById(listID);
 
+	this.getInput = function() {
+		return this.inputElement.value;
+	};
+
 	this.displaySuggestions = function(suggestionsList) {
 		this.listElement.innerHTML = "";
 

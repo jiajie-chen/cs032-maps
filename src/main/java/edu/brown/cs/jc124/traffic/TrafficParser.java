@@ -1,7 +1,15 @@
 package edu.brown.cs.jc124.traffic;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import edu.brown.cs.is3.cartesian.RadianLatLng;
 
 /**
  * Parses traffic information into a map from way ids to traffic values.
@@ -25,18 +33,19 @@ public class TrafficParser {
    */
   public Map<String, Double> parse() {
     Map<String, Double> toReturn = new HashMap<>();
+    
+    Type listType =
+        new TypeToken<ArrayList<ArrayList<String>>>() {
+        }.getType();
+    List<List<String>> pairs = new Gson().fromJson(s, listType);
 
-    String[] pairs = s.substring(1, s.length() - 1).split(", ");
-
-    for (String pair : pairs) {
-      String[] eles = pair.replace("[", "").replace("]", "").split(", ");
-
-      String id = eles[0];
-      double traffic = Double.parseDouble(eles[1]);
-
+    for (List<String> eles : pairs) {
+      String id = eles.get(0);
+      double traffic = Double.parseDouble(eles.get(1));
+      
       toReturn.put(id, traffic);
     }
-
+    
     return toReturn;
   }
 
