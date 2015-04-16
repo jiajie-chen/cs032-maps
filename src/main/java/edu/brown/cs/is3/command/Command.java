@@ -3,6 +3,11 @@ package edu.brown.cs.is3.command;
 import edu.brown.cs.is3.graph.Path;
 import edu.brown.cs.jc124.manager.MapsManager;
 
+/**
+ * Interface for the various maps REPL commands.
+ * @author is3
+ *
+ */
 public interface Command {
   /**
    * Executes a path search command.

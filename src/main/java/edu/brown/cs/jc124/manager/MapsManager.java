@@ -22,7 +22,10 @@ public class MapsManager {
   private final KdTreeHelper mapsKd;
 
   /**
+   * Constructs a map manager to integrate the various components of maps
+   * requests.
    * @param db to fill components from.
+   * @param gui true if the program is being run as a gui and false otherwise.
    */
   public MapsManager(Database db, boolean gui) {
     this.db = db;

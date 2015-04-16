@@ -43,7 +43,8 @@
 //        return this.getLongitude();
 //      default:
 //        throw new IllegalArgumentException(
-//            "Dimension " + axis + " exceeds number of dimensions " + LATLNG_DIM);
+//            "Dimension " + axis
+//+ " exceeds number of dimensions " + LATLNG_DIM);
 //    }
 //  }
 //

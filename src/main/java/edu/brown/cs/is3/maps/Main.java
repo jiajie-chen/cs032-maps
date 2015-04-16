@@ -18,16 +18,6 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
-// SHOULD BE TESTING PARSING SOMEWHERE AND MAYBE FACTOR STUFF FROM MAIN
-// TURNS OUT THE DATA ENTRY IN MAPS.SQLITE3 IS THE BIGGEST NIGHTMARE EVER
-// AND ONLY SORT OF GETS YOU THE KIND OF THINGS YOU WOULD WANT
-
-// OPTIMIZATION: REMOVE IMMUTABLE, CHANGE COMPARATOR, BUILD MORE OBJECTS
-
-// DO TONS OF TESTING AND OPTIMIZATION
-
-// DO TESTING, COMMENTING, STYLE, TRAFFIC, DRAWING
-
 // TEST PARSING, ISDOUBLE, DB, SYSTEM
 // INCLUDE MULTIPLE COMMAND, SERVER, AND LAT LNG BASED TESTING!
 // SLOW TESTER MAYBE?
@@ -39,6 +29,12 @@ import joptsimple.OptionSpec;
 // TRAFFIC
 // STYLE
 // SERVER STABILITY
+
+// TODO
+
+// TRAFFIC
+// STYLE/FINDBUGS
+// STREETS
 
 /**
  * Main class implementing maps, including shortest path searches, auto
@@ -190,7 +186,7 @@ public class Main implements Runnable {
 
       Server s = new Server(sparkPort, db, traffic, changes);
       s.run();
-      
+
       Thread t = new Thread(new TrafficManager(trafficPort, traffic, changes));
       t.start();
 
@@ -199,6 +195,7 @@ public class Main implements Runnable {
       System.err.println("ERROR: " + e.getMessage());
       return;
     } finally {
+      System.out.println();
       // db.close();
     }
   }
