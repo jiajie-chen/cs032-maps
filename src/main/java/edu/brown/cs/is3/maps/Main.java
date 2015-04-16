@@ -24,7 +24,6 @@ import joptsimple.OptionSpec;
 
 // OPTIMIZATION: REMOVE IMMUTABLE, CHANGE COMPARATOR, BUILD MORE OBJECTS
 
-// MAYBE MAKE RADIANLATLNG EXTEND SIMPLE LAT LNG FOR CONVENIENCE
 // DO TONS OF TESTING AND OPTIMIZATION
 
 // DO TESTING, COMMENTING, STYLE, TRAFFIC, DRAWING
@@ -32,6 +31,14 @@ import joptsimple.OptionSpec;
 // TEST PARSING, ISDOUBLE, DB, SYSTEM
 // INCLUDE MULTIPLE COMMAND, SERVER, AND LAT LNG BASED TESTING!
 // SLOW TESTER MAYBE?
+
+// TODO
+
+// MORE TESTING
+// README
+// TRAFFIC
+// STYLE
+// SERVER STABILITY
 
 /**
  * Main class implementing maps, including shortest path searches, auto
@@ -158,10 +165,13 @@ public class Main implements Runnable {
     String s = r.readLine();
 
     while (s != null && s.length() != 0) {
-      Command c = new ReplParser(s).parse();
-      Path p = c.run(manager);
-
-      System.out.println(p);
+      try {
+        Command c = new ReplParser(s).parse();
+        Path p = c.run(manager);
+        System.out.println(p);
+      } catch (IllegalArgumentException e) {
+        System.err.println("ERROR: " + e.getMessage());
+      }
 
       s = r.readLine();
     }
@@ -186,7 +196,7 @@ public class Main implements Runnable {
 
       // db.close();
     } catch (RuntimeException e) {
-      System.err.println(e.getMessage());
+      System.err.println("ERROR: " + e.getMessage());
       return;
     } finally {
       // db.close();
