@@ -5,25 +5,39 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Parser for the maps REPL.
+ * @author is3
+ *
+ */
 public class ReplParser {
   private final String s;
   private static final int EXPECTED_ARGS = 4;
 
+  /**
+   * Builds a parser for a given string.
+   * @param s string to parse.
+   */
   public ReplParser(String s) {
     this.s = s;
   }
 
+  /**
+   * Parses a string and throws an exception or returns a command based on user
+   * input. Only takes nonempty and non null strings.
+   * @return a command based on the string input by the user
+   */
   public Command parse() {
     List<String> toBuild = new ArrayList<>();
 
     boolean areStreetNames = Pattern.matches(
         "^\"([a-zA-Z0-9'-\\. ]+)\"\\s+\"([a-zA-Z0-9'-\\. ]+)\"\\s+"
             + "\"([a-zA-Z0-9'-\\. ]+)\"\\s+\"([a-zA-Z0-9'-\\. ]+)\"$",
-        s.trim());
+        s.trim()); // checks for four strings surrounded by quotes
 
     if (areStreetNames) {
       Pattern p = Pattern.compile("\"([a-zA-Z0-9'-\\. ]+)\"");
-      Matcher m = p.matcher(s);
+      Matcher m = p.matcher(s); // looks for individual strings in quotes
 
       while (m.find()) {
         String arg = m.group().replace("\"", "");
@@ -41,7 +55,8 @@ public class ReplParser {
 
       return new StreetCommand(args);
     } else if (containsDoubles(s)) {
-      String args[] = s.split("\\s+");
+      String[] args =
+          s.trim().replace("\"", "").replace("\\", "").split("\\s+");
 
       if (args.length != EXPECTED_ARGS) {
         throw new IllegalArgumentException("Bad double input: " + s);
@@ -59,7 +74,7 @@ public class ReplParser {
    * @return true if all strings are doubles and false otherwise.
    */
   private static boolean containsDoubles(String s) {
-    String[] args = s.split("\\s+");
+    String[] args = s.trim().split("\\s+");
 
     for (String d : args) {
       if (!isDouble(d)) {
