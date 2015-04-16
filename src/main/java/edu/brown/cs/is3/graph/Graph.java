@@ -12,8 +12,6 @@ import edu.brown.cs.is3.maps.Database;
 import edu.brown.cs.is3.maps.Node;
 import edu.brown.cs.is3.maps.Way;
 
-// should probably be using squared distances!!!!!!!!!!!!!!!!!!!!!!!!!
-// LOOK AT PATH BUILDING
 /**
  * Implementation of graph and a star search for ways and nodes.
  * @author is3
@@ -59,11 +57,11 @@ public class Graph {
     }
 
     this.pathStart = start;
-    /*
+
     if (traffic != null) {
       return trafficDijkstras(start, end);
     }
-    */
+
     Map<Node, Double> distances = new HashMap<>(); // the distances list (g)
     PriorityQueue<WeightedNode> open =
         new PriorityQueue<>(); // the open list (by f)
@@ -116,43 +114,49 @@ public class Graph {
    * @return path with the shortest set of ways or null list if no path exists.
    */
   private Path trafficDijkstras(Node start, Node end) {
-    return dijkstras(start, end);
+    Map<Node, Double> distances = new HashMap<>(); // the distances list (g)
+    PriorityQueue<WeightedNode> open =
+        new PriorityQueue<>(); // the open list (by f)
+    Set<Node> closed = new HashSet<>(); // the explored list
+    Map<Node, Way> parents = new HashMap<>(); // (node, way to node)
 
-    // throw new RuntimeException("NYI");
+    distances.put(start, 0.0);
+    open.add(new WeightedNode(start, 0.0));
+    parents.put(start, null);
 
-    // Map<Node, Double> distances = new HashMap<>(); // the distances list (g)
-    // PriorityQueue<Node> open = new PriorityQueue<>(
-    // new DistanceToComparator(end, distances)); // the open list (by f)
-    // Set<Node> closed = new HashSet<>(); // the explored list
-    // Map<Node, Way> parents = new HashMap<>(); // (node, way to node)
-    //
-    // distances.put(start, 0.0);
-    // open.add(start);
-    // parents.put(start, null);
-    //
-    // while (!open.isEmpty()) {
-    // Node curr = open.poll();
-    //
-    // if (curr.equals(end)) {
-    // return generateSolution(curr, parents);
-    // }
-    //
-    // closed.add(curr);
-    //
-    // for (String wayId : curr.getWayIDs()) {
-    // Way w = db.wayOfId(wayId);
-    // Node next = db.nodeOfId(w.getEndId());
-    //
-    // if (!closed.contains(next)) {
-    // distances.put(next, distances.get(curr)
-    // + (traffic.getOrDefault(wayId, 1.0) * curr.getDistance(next)));
-    // open.add(next);
-    // parents.put(next, w);
-    // }
-    // }
-    // }
+    while (!open.isEmpty()) {
+      Node curr = open.poll().getEle();
+      double currDistance = distances.get(curr);
 
-    // return new Path(start, end); // path with no ways
+      if (curr.equals(end)) {
+        return generateSolution(curr, parents);
+      }
+
+      closed.add(curr);
+      Set<Way> edges = db.waysOfNode(curr);
+
+      for (Way w : edges) {
+        Node next = db.nodeOfId(w.getEndId());
+
+        if (!closed.contains(next)) {
+          double nextTraffic = traffic.getOrDefault(w.getId(), 1.0);
+
+          double nextDist = currDistance
+              + (curr.getDistance(next) * nextTraffic); // g
+          double oldNextDist =
+              distances.getOrDefault(next, Double.MAX_VALUE); // old g
+
+          if (nextDist < oldNextDist) {
+            double nextTotal = nextDist + next.getDistance(end); // f
+            distances.put(next, nextDist);
+            open.add(new WeightedNode(next, nextTotal));
+            parents.put(next, w);
+          }
+        }
+      }
+    }
+
+    return new Path(start, end); // path with no ways
   }
 
   /**
